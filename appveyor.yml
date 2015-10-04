@@ -4,7 +4,8 @@ pull_requests:
 skip_tags: true
 os: Unstable
 init:
-- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor\appveyor.init.ps1
+- ps: >-
+	iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 environment:
   POWERSHELLGALLERY_API_TOKEN:
     secure: a+hx9b2u5fyhuLZSxUL50dedlnWj5PFl4zA7KcsilJxWnEtG6psrcUWUUtXgGzkf
