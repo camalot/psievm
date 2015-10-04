@@ -107,7 +107,7 @@ $(CI_PROJECT_URL)" Files="@(ZipFiles);"
 	<UsingTask
 		TaskName="VersionRevision"
 		TaskFactory="CodeTaskFactory"
-		AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll">
 		<ParameterGroup>
 			<Revision ParameterType="System.Int32" Output="true" />
 		</ParameterGroup>
@@ -126,7 +126,7 @@ $(CI_PROJECT_URL)" Files="@(ZipFiles);"
 
 	</UsingTask>
 
-	<UsingTask TaskName="ReplaceFileText" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+	<UsingTask TaskName="ReplaceFileText" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll">
 		<ParameterGroup>
 			<InputFilename ParameterType="System.String" Required="true" />
 			<OutputFilename ParameterType="System.String" Required="true" />
