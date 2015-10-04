@@ -4,6 +4,76 @@
 $PSIEVMVERSION = "0.1.0.0";
 
 function Get-IEVM {
+<#
+
+.SYNOPSIS
+
+Gets an IE VM from modern.ie and imports it to the supported VM Host.
+
+
+.DESCRIPTION
+
+
+.PARAMETER OS 
+
+The OS version. Supported values:
+
+- XP
+- Vista
+- 7
+- 8
+- 8.1
+- 10
+
+.PARAMETER IEVersion
+
+Based on the OS the following version are supported:
+
+- XP: 6, 7
+- Vista:  8
+- Win7: 8, 9, 10, 11
+- Win8: 10
+- Win8.1: 11
+- Win10: Edge
+
+.PARAMETER Shares
+
+A list of shares to mount in the VM (when supported by the host)
+
+.PARAMETER AlternateVMLocation
+
+Use an alternate location to find the VM image zips. The zips MUST follow the following name format:
+
+IE: IE<Version>.<OS>.For.Windows.<VMHost>.zip
+Edge: Microsoft%20Edge.<OS>.For.Windows.<VMHost>.zip
+
+.PARAMETER VMHost
+
+Defines the VM host to use. Supported VM hosts: VirtualBox, VMWare, VPC, HyperV, Vagrant
+
+.PARAMETER IgnoreInvalidMD5
+
+If $true, it will ignore the zip file MD5 hash check.
+
+.EXAMPLE
+
+Get the IE6 on Windows XP VM for VirtualBox
+
+Get-IEVM -OS XP -IEVersion 6 -VMHost VirtualBox
+
+
+.EXAMPLE 
+
+Get the IE9 on Windows 7 VM for VirtualBox from your company network share
+
+Get-IEVM -OS Win7 -IEVersion 9 -VMHost VirtualBox -AlternateVMLocation "\\vmhost-machine\VirtualBox\"
+
+
+.NOTES
+
+Fork on Github: https://github.com/camalot/psievm
+
+#>
 	[CmdletBinding()]
 	Param (
 		[ValidateSet("XP", "Vista", "7", "8", "8.1", "10", "WinXP","WinVista", "Win7", "Win8", "Win8.1", "Win10", "WindowsXP","WindowsVista", "Windows7", "Windows8", "Windows8.1", "Windows10")]
@@ -79,7 +149,7 @@ function Get-IEVM {
 			"HyperV" {
 				$VMHost = "HyperV_2012";
 				$vmext = "vhd";
-				throw "Unsupported VMHost : $VMHost";
+				throw "Currently unsupported VMHost : $VMHost";
 				return;
 			}
 			"VirtualBox" {
@@ -87,19 +157,19 @@ function Get-IEVM {
 			}
 			"Vagrant" {
 				$vmext = "box";
-				throw "Unsupported VMHost : $VMHost";
+				throw "Currently unsupported VMHost : $VMHost";
 				return;
 			}
 			"VMWare" {
-				throw "Unsupported VMHost : $VMHost";
+				throw "Currently unsupported VMHost : $VMHost";
 				return;
 			}
 			"VPC" {
-				throw "Unsupported VMHost : $VMHost";
+				throw "Currently unsupported VMHost : $VMHost";
 				return;
 			}
 			default {
-				throw "Unsupported VMHost : $VMHost";
+				throw "Unknown VMHost : $VMHost";
 				return;
 			}
 		}
