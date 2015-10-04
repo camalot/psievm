@@ -1,7 +1,27 @@
 <#
-	this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
+Copyright 2015 Ryan Conrad
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+----- 
+this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
+
 #>
+
 $PSIEVMVERSION = "0.1.0.0";
+
+#region Exported Functions 
+
 function Get-IEVM {
 	<#
 
@@ -246,6 +266,8 @@ function Get-IEVM {
 	}
 }
 
+#endregion 
+
 function Import-VMImage {
 	Param (
 		[string] $IEVersion,
@@ -300,6 +322,7 @@ function Start-VMHost {
 	};
 }
 
+#region VirtualBox 
 function Import-VBoxImage { 
 	Param (
 		[Parameter(Mandatory=$true, Position=0)]
@@ -402,7 +425,9 @@ function Get-VBoxManageExe {
 	}
 	return $vbm;
 }
+#endregion 
 
+#region Chocolatey 
 function Get-ChocolateyExe {
 	$cho = "$env:ProgramData\chocolatey\choco.exe";
 	if(!(Test-Path -Path $cho) ) {
@@ -418,6 +443,8 @@ function Get-ChocolateyExe {
 function Invoke-InstallChocolatey {
 	Invoke-Expression -Command ((new-object -TypeName net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
+
+#endregion 
 
 function Validate-ZipMD5 {
 	Param (
@@ -440,7 +467,7 @@ function Validate-ZipMD5 {
 				"IE11 - Win7" = "7AA66EC15A51EE8B0A4AB39353472F07";
 				"IE10 - Win8" = "CAF9FCEF0A4EE13A236BDC7BDB9FF1D3";
 				"IE11 - Win8.1" = "080C652C69359B6742DE547BA594AB2A";
-				"Edge - Win10" = "";
+				"Edge - Win10" = "X";
 			}
 		};
 	}
@@ -451,4 +478,3 @@ function Validate-ZipMD5 {
 		return $hash -ieq $chash;
 	}
 }
-

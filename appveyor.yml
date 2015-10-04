@@ -2,7 +2,7 @@ version: 0.1.{build}
 skip_tags: true
 os: Unstable
 init:
-- ps: 
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 environment:
   PSGApiKey:
     secure: a+hx9b2u5fyhuLZSxUL50dedlnWj5PFl4zA7KcsilJxWnEtG6psrcUWUUtXgGzkf
