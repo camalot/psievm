@@ -1,19 +1,21 @@
 version: 0.1.{build}
 skip_tags: true
 init:
-- ps: $env:PSModulePath = "$($env:PSModulePath);$(APPVEYOR_BUILD_FOLDER)\psievm\";
+- ps: 
 environment:
   PSGApiKey:
     secure: a+hx9b2u5fyhuLZSxUL50dedlnWj5PFl4zA7KcsilJxWnEtG6psrcUWUUtXgGzkf
 install:
 - ps: >-
-    Get-PackageProvider -Name NuGet -ForceBootstrap
-
-    Install-Module -Name PSScriptAnalyzer -Force
+    choco install powershell -pre;
+    Get-PackageProvider -Name NuGet -ForceBootstrap;
+    Install-Module -Name PSScriptAnalyzer -Force;
 artifacts:
 - path: '**\psievm.ps*1'
   name: PSModule
 before_deploy:
 - ps: 
 after_deploy:
-- ps: Publish-Module -NuGetApiKey $(PSGApiKey) -Name $(APPVEYOR_PROJECT_SLUG)
+- ps: >-
+    $env:PSModulePath = "$($env:PSModulePath);$(APPVEYOR_BUILD_FOLDER)\psievm\";
+    Publish-Module -NuGetApiKey $(PSGApiKey) -Name $(APPVEYOR_PROJECT_SLUG);
