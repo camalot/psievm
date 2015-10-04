@@ -104,28 +104,29 @@ function Get-IEVM {
 		# Add the attributes to the attributes collection
 		$AttributeCollection.Add($ParameterAttribute);
 		$arrSet = @();
-		switch ($OS) {
-			"^(win(dows)?)?xp" {
+		# We need to set the version that each OS supports, plus, we need to make sure the OS is in the correct format.
+		switch -Regex ($OS) {
+			"^(win(dows)?)?\s?xp$" {
 				$OS = "XP";
 				$arrSet = @("6","8");
 			}
-			"^(win(dows)?)?vista" {
+			"^(win(dows)?)?\s?vista$" {
 				$OS = "Vista";
 				$arrSet = @("7");
 			}
-			"^(win(dows)?)?7" {
+			"^(win(dows)?)?\s?7$" {
 				$OS = "7";
 				$arrSet = @("8","9","10","11");
 			}
-			"^(win(dows)?)?8" {
+			"^(win(dows)?)?\s?8$" {
 				$OS = "8";
 				$arrSet = @("10");
 			}
-			"^(win(dows)?)?8.1" {
+			"^(win(dows)?)?\s?8.1$" {
 				$OS = "8.1";
 				$arrSet = @("11");
 			}
-			"^(win(dows)?)?10" {
+			"^(win(dows)?)?\s?10$" {
 				$OS = "10";
 				$arrSet = @("Edge");
 			}
@@ -143,6 +144,7 @@ function Get-IEVM {
 		$VMUser = "IEUser";
 		$VMPassword = "Passw0rd!";
 		$IEVersion = $PsBoundParameters[$ievParam];
+		Write-Host "Initializing for VMHost '$VMHost'" -BackgroundColor Gray -ForegroundColor Black;
 
 		switch ($VMHost) {
 			"HyperV" {
@@ -172,7 +174,6 @@ function Get-IEVM {
 				return;
 			}
 		}
-
 
 		# No alternate VM Location is specified, download from ms
 		if($AlternateVMLocation -eq "" -or $AlternateVMLocation -eq $null) {
@@ -209,7 +210,6 @@ function Get-IEVM {
 			New-Item -Path $vmPath -ItemType Directory | Out-Null;
 		}
 
-		
 		# if the VM does not exist
 		if( !(Test-VMHost -VMHost $VMHost -VMName $vmName) ) {
 			if(!(Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
@@ -235,8 +235,11 @@ function Get-IEVM {
 				Write-Host "VM import file '$vmImportFile' not found." -BackgroundColor Red -ForegroundColor White;
 				return;
 			}
-
-			Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -Shares $Shares;
+			$importSuccess = Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -Shares $Shares;
+			if(!$importSuccess) {
+				Write-Host "VM import failed." -BackgroundColor Red -ForegroundColor White;
+				return;
+			}
 		}
 
 		Start-VMHost -VMHost $VMHost -VMName $vmName;
@@ -255,7 +258,7 @@ function Import-VMImage {
 
 	switch($VMHost) {
 		"VirtualBox" {
-			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -Shares $Shares
+			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -Shares $Shares;
 		}
 		default {
 			return $false;
@@ -311,35 +314,39 @@ function Import-VBoxImage {
 		[string[]] $Shares = @()
 
 	);
-
-	$vbunit = "11";
-	switch -Regex ($IEVersion) {
-		"^edge$" {
-			$vbunit = "8";
-		}
-		"^(6|7|8)$" {
-			$vbunit = "10";
-		}
-	};
+	try {
+		$vbunit = "11";
+		switch -Regex ($IEVersion) {
+			"^edge$" {
+				$vbunit = "8";
+			}
+			"^(6|7|8)$" {
+				$vbunit = "10";
+			}
+		};
 	
-	$vbm = Get-VBoxManageExe;
-	$vbox = (Join-Path -Path $vmPath -ChildPath "${vmName}.vbox");
-	$disk = (Join-Path -Path $vmPath -ChildPath ("$VMName-disk1.vmdk"));
-	Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+		$vbm = Get-VBoxManageExe;
+		$vbox = (Join-Path -Path $vmPath -ChildPath "${vmName}.vbox");
+		$disk = (Join-Path -Path $vmPath -ChildPath ("$VMName-disk1.vmdk"));
+		Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
-	(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
-	$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
-		$shareName = (Split-Path -Path $_ -Leaf);
-		Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-		(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
+		(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
+		$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
+			$shareName = (Split-Path -Path $_ -Leaf);
+			Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+			(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
+		}
+
+		#$dt = (Get-Date -Format 'MM-dd-yyyy hh:mm');
+		#(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
+
+		Write-Host ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+
+		(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
+		return $true;
+	} catch [System.Exception] {
+		return $false;
 	}
-
-	#$dt = (Get-Date -Format 'MM-dd-yyyy hh:mm');
-	#(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
-
-	Write-Host ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-
-	(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
 }
 
 function Start-VBoxVM {
