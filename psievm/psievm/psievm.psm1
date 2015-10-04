@@ -2,78 +2,77 @@
 	this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
 #>
 $PSIEVMVERSION = "0.1.0.0";
-
 function Get-IEVM {
-<#
+	<#
 
-.SYNOPSIS
+	.SYNOPSIS
 
-Gets an IE VM from modern.ie and imports it to the supported VM Host.
-
-
-.DESCRIPTION
+	Gets an IE VM from modern.ie and imports it to the supported VM Host.
 
 
-.PARAMETER OS 
-
-The OS version. Supported values:
-
-- XP
-- Vista
-- 7
-- 8
-- 8.1
-- 10
-
-.PARAMETER IEVersion
-
-Based on the OS the following version are supported:
-
-- XP: 6, 7
-- Vista:  8
-- Win7: 8, 9, 10, 11
-- Win8: 10
-- Win8.1: 11
-- Win10: Edge
-
-.PARAMETER Shares
-
-A list of shares to mount in the VM (when supported by the host)
-
-.PARAMETER AlternateVMLocation
-
-Use an alternate location to find the VM image zips. The zips MUST follow the following name format:
-
-IE: IE<Version>.<OS>.For.Windows.<VMHost>.zip
-Edge: Microsoft%20Edge.<OS>.For.Windows.<VMHost>.zip
-
-.PARAMETER VMHost
-
-Defines the VM host to use. Supported VM hosts: VirtualBox, VMWare, VPC, HyperV, Vagrant
-
-.PARAMETER IgnoreInvalidMD5
-
-If $true, it will ignore the zip file MD5 hash check.
-
-.EXAMPLE
-
-Get the IE6 on Windows XP VM for VirtualBox
-
-Get-IEVM -OS XP -IEVersion 6 -VMHost VirtualBox
+	.DESCRIPTION
 
 
-.EXAMPLE 
+	.PARAMETER OS 
 
-Get the IE9 on Windows 7 VM for VirtualBox from your company network share
+	The OS version. Supported values:
 
-Get-IEVM -OS Win7 -IEVersion 9 -VMHost VirtualBox -AlternateVMLocation "\\vmhost-machine\VirtualBox\"
+	- XP
+	- Vista
+	- 7
+	- 8
+	- 8.1
+	- 10
+
+	.PARAMETER IEVersion
+
+	Based on the OS the following version are supported:
+
+	- XP: 6, 7
+	- Vista:  8
+	- Win7: 8, 9, 10, 11
+	- Win8: 10
+	- Win8.1: 11
+	- Win10: Edge
+
+	.PARAMETER Shares
+
+	A list of shares to mount in the VM (when supported by the host)
+
+	.PARAMETER AlternateVMLocation
+
+	Use an alternate location to find the VM image zips. The zips MUST follow the following name format:
+
+	IE: IE<Version>.<OS>.For.Windows.<VMHost>.zip
+	Edge: Microsoft%20Edge.<OS>.For.Windows.<VMHost>.zip
+
+	.PARAMETER VMHost
+
+	Defines the VM host to use. Supported VM hosts: VirtualBox, VMWare, VPC, HyperV, Vagrant
+
+	.PARAMETER IgnoreInvalidMD5
+
+	If $true, it will ignore the zip file MD5 hash check.
+
+	.EXAMPLE
+
+	Get the IE6 on Windows XP VM for VirtualBox
+
+	Get-IEVM -OS XP -IEVersion 6 -VMHost VirtualBox
 
 
-.NOTES
+	.EXAMPLE 
 
-Fork on Github: https://github.com/camalot/psievm
+	Get the IE9 on Windows 7 VM for VirtualBox from your company network share
 
-#>
+	Get-IEVM -OS Win7 -IEVersion 9 -VMHost VirtualBox -AlternateVMLocation "\\vmhost-machine\VirtualBox\"
+
+
+	.NOTES
+
+	Fork on Github: https://github.com/camalot/psievm
+
+	#>
 	[CmdletBinding()]
 	Param (
 		[ValidateSet("XP", "Vista", "7", "8", "8.1", "10", "WinXP","WinVista", "Win7", "Win8", "Win8.1", "Win10", "WindowsXP","WindowsVista", "Windows7", "Windows8", "Windows8.1", "Windows10")]
@@ -94,11 +93,11 @@ Fork on Github: https://github.com/camalot/psievm
 		# Set the dynamic parameters' name
 		$ievParam = "IEVersion";
 		# Create the dictionary 
-		$RuntimeParameterDictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary;
+		$RuntimeParameterDictionary = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameterDictionary;
 		# Create the collection of attributes
-		$AttributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute];
+		$AttributeCollection = New-Object -TypeName System.Collections.ObjectModel.Collection[System.Attribute];
 		# Create and set the parameters' attributes
-		$ParameterAttribute = New-Object System.Management.Automation.ParameterAttribute;
+		$ParameterAttribute = New-Object -TypeName System.Management.Automation.ParameterAttribute;
 		$ParameterAttribute.Mandatory = $true;
 		$ParameterAttribute.Position = 1;
 
@@ -131,11 +130,11 @@ Fork on Github: https://github.com/camalot/psievm
 				$arrSet = @("Edge");
 			}
 		}
-		$ValidateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($arrSet);
+		$ValidateSetAttribute = New-Object -TypeName System.Management.Automation.ValidateSetAttribute($arrSet);
 		# Add the ValidateSet to the attributes collection
 		$AttributeCollection.Add($ValidateSetAttribute);
 		# Create and return the dynamic parameter
-		$RuntimeParameter = New-Object System.Management.Automation.RuntimeDefinedParameter($ievParam, [string], $AttributeCollection);
+		$RuntimeParameter = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameter($ievParam, [string], $AttributeCollection);
 		$RuntimeParameterDictionary.Add($ievParam, $RuntimeParameter);
 		return $RuntimeParameterDictionary;
 	}
@@ -201,7 +200,6 @@ Fork on Github: https://github.com/camalot/psievm
 		
 		$vmImportFile = (Join-Path $vmPath "${vmName}.${vmext}" );
 		$zip = (Join-Path $vmPath "${vmName}.zip");
-		$vbox = (Join-Path $vmPath "${vmName}.vbox");
 	}
 	
 	process {
@@ -238,7 +236,7 @@ Fork on Github: https://github.com/camalot/psievm
 				return;
 			}
 
-			Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS;
+			Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -Shares $Shares;
 		}
 
 		Start-VMHost -VMHost $VMHost -VMName $vmName;
@@ -251,12 +249,13 @@ function Import-VMImage {
 		[string] $OS,
 		[string] $VMHost,
 		[string] $VMName,
-		[string] $ImportFile
+		[string] $ImportFile,
+		[string[]] $Shares
 	);
 
 	switch($VMHost) {
 		"VirtualBox" {
-			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile
+			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -Shares $Shares
 		}
 		default {
 			return $false;
@@ -295,18 +294,24 @@ function Start-VMHost {
 		default {
 			return $false;
 		}
-	}
+	};
 }
 
-#region VBox
-function Import-VBoxImage {
+function Import-VBoxImage { 
 	Param (
+		[Parameter(Mandatory=$true, Position=0)]
 		[string] $IEVersion,
+		[Parameter(Mandatory=$true, Position=1)]
 		[string] $OS,
+		[Parameter(Mandatory=$true, Position=2)]
 		[string] $VMName,
-		[string] $ImportFile
+		[Parameter(Mandatory=$true, Position=3)]
+		[string] $ImportFile,
+		[Parameter(Mandatory=$false, Position=4)]
+		[string[]] $Shares = @()
+
 	);
-	# VirtualBox import
+
 	$vbunit = "11";
 	switch -Regex ($IEVersion) {
 		"^edge$" {
@@ -315,23 +320,25 @@ function Import-VBoxImage {
 		"^(6|7|8)$" {
 			$vbunit = "10";
 		}
-	}
+	};
+	
 	$vbm = Get-VBoxManageExe;
+	$vbox = (Join-Path $vmPath "${vmName}.vbox");
 	$disk = (Join-Path $vmPath ("$VMName-disk1.vmdk"));
 	Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-	#Write-Host "$vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`"" -BackgroundColor White -ForegroundColor Black;
+
 	(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
-	$Shared | where { $_ -ne "" -and $_ -ne $null; } | foreach {
+	$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
 		$shareName = (Split-Path $_ -Leaf);
 		Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-		#Write-Host "$vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`"" -BackgroundColor White -ForegroundColor Black;
 		(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
 	}
-	#Write-Host ("Setting Extra data on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-	$dt = (Get-Date -Format 'MM-dd-yyyy hh:mm');
-	(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
+
+	#$dt = (Get-Date -Format 'MM-dd-yyyy hh:mm');
+	#(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
+
 	Write-Host ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-	#Write-Host "$vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`"" -BackgroundColor White -ForegroundColor Black;
+
 	(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
 }
 
@@ -388,9 +395,7 @@ function Get-VBoxManageExe {
 	}
 	return $vbm;
 }
-#endregion
 
-#region chocolatey
 function Get-ChocolateyExe {
 	$cho = "$env:ProgramData\chocolatey\choco.exe";
 	if(!(Test-Path -Path $cho) ) {
@@ -404,9 +409,8 @@ function Get-ChocolateyExe {
 }
 
 function Invoke-InstallChocolatey {
-	iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
+	Invoke-Expression -Command ((new-object -TypeName net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
-#endregion
 
 function Validate-ZipMD5 {
 	Param (
@@ -441,4 +445,3 @@ function Validate-ZipMD5 {
 	}
 }
 
-Export-Module -Function Get-IEVM -Alias psievm;
