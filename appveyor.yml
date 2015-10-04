@@ -1,5 +1,6 @@
 version: 0.1.{build}
 skip_tags: true
+os: Visual Studio 2015
 init:
 - ps: 
 environment:
@@ -7,8 +8,10 @@ environment:
     secure: a+hx9b2u5fyhuLZSxUL50dedlnWj5PFl4zA7KcsilJxWnEtG6psrcUWUUtXgGzkf
 install:
 - ps: >-
-    choco install powershell -pre;
+    choco install powershell -pre -y;
+
     Get-PackageProvider -Name NuGet -ForceBootstrap;
+
     Install-Module -Name PSScriptAnalyzer -Force;
 artifacts:
 - path: '**\psievm.ps*1'
@@ -18,4 +21,6 @@ before_deploy:
 after_deploy:
 - ps: >-
     $env:PSModulePath = "$($env:PSModulePath);$(APPVEYOR_BUILD_FOLDER)\psievm\";
-    Publish-Module -NuGetApiKey $(PSGApiKey) -Name $(APPVEYOR_PROJECT_SLUG);
+
+
+    Publish-Module -NuGetApiKey $(PSGApiKey) -Name $(APPVEYOR_PROJECT_SLUG)
