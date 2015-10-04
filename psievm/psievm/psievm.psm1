@@ -196,10 +196,10 @@ function Get-IEVM {
 		}
 
 		$vmName = ("IE{0} - Win{1}" -f $IEVersion, $OS);
-		$vmPath = (Join-Path $pwd $vmName);
+		$vmPath = (Join-Path -Path $pwd -ChildPath $vmName);
 		
-		$vmImportFile = (Join-Path $vmPath "${vmName}.${vmext}" );
-		$zip = (Join-Path $vmPath "${vmName}.zip");
+		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${vmName}.${vmext}" );
+		$zip = (Join-Path -Path $vmPath -ChildPath "${vmName}.zip");
 	}
 	
 	process {
@@ -323,13 +323,13 @@ function Import-VBoxImage {
 	};
 	
 	$vbm = Get-VBoxManageExe;
-	$vbox = (Join-Path $vmPath "${vmName}.vbox");
-	$disk = (Join-Path $vmPath ("$VMName-disk1.vmdk"));
+	$vbox = (Join-Path -Path $vmPath -ChildPath "${vmName}.vbox");
+	$disk = (Join-Path -Path $vmPath -ChildPath ("$VMName-disk1.vmdk"));
 	Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
 	(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
 	$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
-		$shareName = (Split-Path $_ -Leaf);
+		$shareName = (Split-Path -Path $_ -Leaf);
 		Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 		(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
 	}
