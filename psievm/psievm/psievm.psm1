@@ -18,7 +18,10 @@ this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
 
 #>
 
-$PSIEVMVERSION = "0.1.0.0";
+$PSIEVMMANIFEST = iex (Get-Content -Path "$PSScriptRoot\psievm.psd1" -Raw);
+
+$PSIEVMVERSION = $PSIEVMMANIFEST.ModuleVersion;
+$PSIEVM = "psievm";
 
 #region Exported Functions 
 
@@ -106,7 +109,9 @@ function Get-IEVM {
 		[ValidateSet("VirtualBox", "VMWare", "VPC", "HyperV", "Vagrant")]
 		[string] $VMHost = "VirtualBox",
 		[Parameter(Mandatory=$false, Position=5)]
-		[bool] $IgnoreInvalidMD5 = $false
+		[bool] $IgnoreInvalidMD5 = $false,
+		[Parameter(Mandatory=$false, Position=6)]
+		[string] $VMRootPath = $pwd
 	);
 
 	DynamicParam {
@@ -161,6 +166,9 @@ function Get-IEVM {
 	}
 
 	begin {
+
+		Write-Host "$PSIEVM v$PSIEVMVERSION" -BackgroundColor DarkBlue -ForegroundColor White;
+
 		$VMUser = "IEUser";
 		$VMPassword = "Passw0rd!";
 		$IEVersion = $PsBoundParameters[$ievParam];
@@ -217,7 +225,7 @@ function Get-IEVM {
 		}
 
 		$vmName = ("IE{0} - Win{1}" -f $IEVersion, $OS);
-		$vmPath = (Join-Path -Path $pwd -ChildPath $vmName);
+		$vmPath = (Join-Path -Path $VMRootPath -ChildPath $vmName);
 		
 		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${vmName}.${vmext}" );
 		$zip = (Join-Path -Path $vmPath -ChildPath "${vmName}.zip");
@@ -239,7 +247,7 @@ function Get-IEVM {
 
 			if((Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
 				Write-Host ("Validating MD5 File Hash `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
-				if(!(Validate-ZipMD5 -Path $zip -VMName $vmName -VMHost $VMHost)) {
+				if(!(Test-MD5Hash -Path $zip -VMName $vmName -VMHost $VMHost)) {
 					Write-Host "MD5 hash validation of zip '$zip' failed." -BackgroundColor @{$true="Yellow";$false="Red"}[$IgnoreInvalidMD5] -ForegroundColor @{$true="Black";$false="White"}[$IgnoreInvalidMD5];
 					if(!$IgnoreInvalidMD5) {
 						return;
@@ -265,6 +273,8 @@ function Get-IEVM {
 		Start-VMHost -VMHost $VMHost -VMName $vmName;
 	}
 }
+
+Set-Alias -Name psievm -Value Get-IEVM;
 
 #endregion 
 
@@ -446,7 +456,7 @@ function Invoke-InstallChocolatey {
 
 #endregion 
 
-function Validate-ZipMD5 {
+function Test-MD5Hash {
 	Param (
 		[Parameter(Mandatory=$true, Position=0)]
 		[string] $VMName,

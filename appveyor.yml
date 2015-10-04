@@ -1,30 +1,40 @@
 version: 0.1.{build}
+pull_requests:
+  do_not_increment_build_number: true
 skip_tags: true
 os: Unstable
 init:
-- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor\appveyor.init.ps1
 environment:
-  PSGApiKey:
+  POWERSHELLGALLERY_API_TOKEN:
     secure: a+hx9b2u5fyhuLZSxUL50dedlnWj5PFl4zA7KcsilJxWnEtG6psrcUWUUtXgGzkf
+  PUSHBULLET_API_TOKEN:
+    secure: 2MwCYfQNYPfPjDqNJ1EL8VrIydQNRz3MfhnuI9dzSZag9JwCnqk5k3mMYTFn4ORk
 install:
-- ps: >-
-    choco install powershell -pre -y;
-
-    Write-Host "Loading Choco Log";
-
-    (Get-Content -Path "C:\ProgramData\chocolatey\logs\chocolatey.log" -Raw) | Write-Host;
-
-    Get-PackageProvider -Name NuGet -ForceBootstrap;
-
-    Install-Module -Name PSScriptAnalyzer -Force;
+- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor\appveyor.install.ps1
+before_build:
+- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor.before-build.ps1
+build:
+  project: $(APPVEYOR_BUILD_FOLDER)\psievm\.build\BuildPSIEVM.msbuild
+  verbosity: normal
+after_build:
+- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor.before-after.ps1
 artifacts:
-- path: '**\psievm.ps*1'
+- path: '**\bin\**\psievm.ps*1'
   name: PSModule
+- path: '**\bin\**\psievm.*.zip'
+  name: Zip
 before_deploy:
-- ps: 
+- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor\appveyor.before-deployment.ps1
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_PROJECT_NAME)-v$(CI_BUILD_VERSION)
+  release: $(APPVEYOR_PROJECT_NAME)-v$(CI_BUILD_VERSION)
+  auth_token:
+    secure: UEgy2H9zJKLi599QoO3qVf5BKFqloRQ246ez9cEgsfV3vooAUfVopMS9+IjRtArL
+  artifact: Zip
+  on:
+    branch: master
+    CI_DEPLOY_GITHUB: True
 after_deploy:
-- ps: >-
-    $env:PSModulePath = "$($env:PSModulePath);$(APPVEYOR_BUILD_FOLDER)\psievm\";
-
-
-    Publish-Module -NuGetApiKey $(PSGApiKey) -Name $(APPVEYOR_PROJECT_SLUG)
+- ps: $(APPVEYOR_BUILD_FOLDER)\psievm\.appveyor\appveyor.after-deployment.ps1

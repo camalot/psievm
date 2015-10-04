@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0" DefaultTargets="Build">
+	<Import Project="$(MSBuildProjectDirectory)\..\.build\MSBuild.Community.Tasks.Targets" Condition="'$(MSBuildCommunityTasksPath)' == ''"/>
+
+	<PropertyGroup>
+
+		<CI Condition=" '$(CI)' == '' ">False</CI>
+		<CI_BUILD_MAJOR Condition=" '$(CI_BUILD_MAJOR)' == '' ">0</CI_BUILD_MAJOR>
+		<CI_BUILD_MINOR Condition=" '$(CI_BUILD_MINOR)' == '' ">1</CI_BUILD_MINOR>
+		<CI_BUILD_NUMBER Condition="'$(CI_BUILD_NUMBER)' == '' AND '$(APPVEYOR)' == 'True' AND '$(APPVEYOR_BUILD_NUMBER)' != '' ">$(APPVEYOR_BUILD_NUMBER)</CI_BUILD_NUMBER>
+		<CI_BUILD_NUMBER Condition="'$(CI_BUILD_NUMBER)' == ''">0</CI_BUILD_NUMBER>
+		<CI_BUILD_REVISION Condition=" '$(CI_BUILD_REVISION)' == '' AND '$(APPVEYOR)' != 'True' ">0</CI_BUILD_REVISION>
+		<CI_BUILD_REVISION Condition =" '$(CI_BUILD_REVISION)' == ''">0</CI_BUILD_REVISION>
+
+		<CI_PROJECT_NAME Condition="'$(APPVEYOR)' == 'True' ">$(APPVEYOR_PROJECT_NAME)</CI_PROJECT_NAME>
+		<CI_PROJECT_NAME Condition=" '$(CI_PROJECT_NAME)' == '' ">psievm</CI_PROJECT_NAME>
+		<CI_PROJECT_FRIENDLY_NAME Condition=" '$(CI_PROJECT_FRIENDLY_NAME)' == '' ">psievm</CI_PROJECT_FRIENDLY_NAME>
+		<CI_ARTIFACT_PATH Condition=" '$(CI_ARTIFACT_PATH)' == '' ">$(MSBuildProjectDirectory)\..\bin\</CI_ARTIFACT_PATH>
+		<CI_PROJECT_PATH Condition=" '$(CI_PROJECT_PATH)' == '' ">$(MSBuildProjectDirectory)\..\</CI_PROJECT_PATH>
+
+		<CI_BUILD_DATE Condition=" '$(CI_BUILD_DATE)' == '' ">$([System.DateTime]::UtcNow.ToString("MM-dd-yyyy"))</CI_BUILD_DATE>
+		<CI_BUILD_TIME Condition=" '$(CI_BUILD_TIME)' == '' ">$([System.DateTime]::UtcNow.ToString("hh:mm:ss"))</CI_BUILD_TIME>
+
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'False' ">Local</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_SCHEDULED_BUILD)' == 'True' ">Scheduled</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_FORCED_BUILD)' == 'True' ">Forced</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_RE_BUILD)' == 'True' ">Rebuild</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_REPO_TAG)' == 'True' ">Tag</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_PULL_REQUEST_NUMBER)' == 'True' ">PullRequest</CI_BUILD_CONDITION>
+
+		<CI_PROJECT_URL>https://github.com/camalot/psievm/</CI_PROJECT_URL>
+
+		<Major>$(CI_BUILD_MAJOR)</Major>
+		<Minor>$(CI_BUILD_MINOR)</Minor>
+		<Build>$(CI_BUILD_NUMBER)</Build>
+		<Revision>$(CI_BUILD_REVISION)</Revision>
+
+		<CI_BUILD_VERSION Condition=" '$(CI_BUILD_VERSION)' == '' ">$(Major).$(Minor).$(Build).$(Revision)</CI_BUILD_VERSION>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Code Include="$(CI_PROJECT_PATH)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).ps*1" />
+	</ItemGroup>
+
+	<Target Name="Build" DependsOnTargets="SetBuildNumber;CopyModuleFilesToOutput;AssemblyInfo;ZipRelease">
+		
+	</Target>
+
+
+	<Target Name="CopyModuleFilesToOutput" DependsOnTargets="CleanBuild">
+		<CreateProperty Value="$(CI_ARTIFACT_PATH)\$(CI_BUILD_VERSION)\">
+			<Output PropertyName="OutputPath" TaskParameter="Value" />
+		</CreateProperty>
+		<Copy SourceFiles="@(Code)" DestinationFolder="$(OutputPath)\$(CI_PROJECT_NAME)\" />
+	</Target>
+
+	<Target Name="AssemblyInfo">
+		<ReplaceFileText
+			InputFilename="$(OutputPath)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).psd1"
+			OutputFilename="$(OutputPath)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).psd1"
+			MatchExpression="\{\{VERSION\}\}"
+			ReplacementText="$(CI_BUILD_VERSION)" />
+	</Target>
+
+	<Target Name="CleanBuild">
+		<RemoveDir Directories="$(OutputPath)" Condition="Exists('$(OutputPath)')" ContinueOnError="true" />
+		<MakeDir Directories="$(OutputPath)" Condition="!Exists('$(OutputPath)')" />
+		<MakeDir Directories="$(OutputPath)\$(CI_PROJECT_NAME)\" Condition="!Exists('$(OutputPath)\$(CI_PROJECT_NAME)\')" />
+	</Target>
+
+	<Target Name="ZipRelease">
+		<CreateItem Include="$(OutputPath)**\*" Exclude="$(OutputPath)*.zip;">
+			<Output ItemName="ZipFiles" TaskParameter="Include" />
+		</CreateItem>
+		
+		<Zip Comment="[Build Date: $(CI_BUILD_DATE) $(CI_BUILD_TIME)]
+$(CI_PROJECT_NAME) version $(CI_BUILD_VERSION)
+
+$(CI_PROJECT_URL)" Files="@(ZipFiles);"
+				 WorkingDirectory="$(OutputPath)"
+				 ZipFileName="$(OutputPath)$(CI_PROJECT_NAME).$(CI_BUILD_VERSION).zip" ZipLevel="9" Flatten="False" />
+
+		<!--<Delete Files="@(ZipFiles)" />-->
+	</Target>
+
+
+	<Target Name="SetBuildNumber">
+		<VersionRevision>
+			<Output PropertyName="Revision" TaskParameter="Revision" />
+		</VersionRevision>
+
+		<CreateProperty Value="$(Revision)">
+			<Output PropertyName="CI_BUILD_REVISION" TaskParameter="Value" />
+		</CreateProperty>
+
+		<CreateProperty Value="$(Build)" Condition=" '$(CI_BUILD_NUMBER)' == '0' ">
+			<Output PropertyName="CI_BUILD_NUMBER" TaskParameter="Value" />
+		</CreateProperty>
+
+
+		<CreateProperty Value="$(Major).$(Minor).$(CI_BUILD_NUMBER).$(CI_BUILD_REVISION)">
+			<Output PropertyName="CI_BUILD_VERSION" TaskParameter="Value" />
+		</CreateProperty>
+
+	</Target>
+
+	<UsingTask
+		TaskName="VersionRevision"
+		TaskFactory="CodeTaskFactory"
+		AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<Revision ParameterType="System.Int32" Output="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+				var yy = DateTime.UtcNow.ToString("yy");
+				var day = DateTime.UtcNow.DayOfYear.ToString() ;
+				// 27015 = 09/26/2015
+				this.Revision = int.Parse(day + yy);
+      ]]>
+			</Code>
+
+		</Task>
+
+	</UsingTask>
+
+	<UsingTask TaskName="ReplaceFileText" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<InputFilename ParameterType="System.String" Required="true" />
+			<OutputFilename ParameterType="System.String" Required="true" />
+			<MatchExpression ParameterType="System.String" Required="true" />
+			<ReplacementText ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Reference Include="System.Core" />
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+            File.WriteAllText(
+                OutputFilename,
+                Regex.Replace(File.ReadAllText(InputFilename), MatchExpression, ReplacementText)
+                );
+          ]]>
+			</Code>
+		</Task>
+	</UsingTask>
+
+</Project>

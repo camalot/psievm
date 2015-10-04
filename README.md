@@ -2,9 +2,21 @@
 
 *psievm* is a powershell module for standing up an IE VM quickly and without hassle.
 
-Usage:
+[![Build status](https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true)](https://ci.appveyor.com/project/camalot/psievm)
 
-    PS > Import-Module "psievm"
+
+#### Installation
+
+Installation can be done from the [PowerShell Gallery][9]. Installing modules from the Gallery requires the latest version of the PowerShellGet module, which is available in [Windows 10][10] or in [Windows Management Framework (WMF) 5.0][11].
+
+
+    PS > Install-Module psievm
+
+Manual installation can be done by downloading the latest PSIEVM module from the releases and extract to one of the $PSModuleRoot paths. This is usually *$env:USERPROFILE\Document\WindowsPowerShell\Modules*.
+
+#### Usage
+
+    PS > Import-Module psievm
     PS > Get-IEVM -OS XP -IEVersion 6  
 
 ## Parameters
@@ -17,6 +29,7 @@ Usage:
 | AlternateVMLocation 	|    NO    	| String   	| [Empty]    	|
 | VMHost              	|    NO    	| String   	| VirtualBox 	|
 | IgnoreInvalidMD5    	|    NO    	| Boolean  	| $False     	|
+| VMRootPath            |    NO     | String    | $PWD        |
 
 ### OS / IEVersion
 This is the version of the OS that you want hosted and the version of IE you want with it. Here are the supported values:
@@ -50,3 +63,6 @@ This is the version of the OS that you want hosted and the version of IE you wan
 [6]: https://www.vagrantup.com/
 [7]: https://www.vmware.com/products/player
 [8]: https://chocolatey.org/packages/vmwareplayer
+[9]: https://www.powershellgallery.com/
+[10]: http://go.microsoft.com/fwlink/?LinkID=624830&clcid=0x409
+[11]: http://go.microsoft.com/fwlink/?LinkId=398175

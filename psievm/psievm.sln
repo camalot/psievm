@@ -15,7 +15,36 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".git", ".git", "{A36C2979-4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".appveyor", ".appveyor", "{F5362226-6504-4984-A249-1E3E7ED9AF26}"
 	ProjectSection(SolutionItems) = preProject
+		.appveyor\appveyor-variables.txt = .appveyor\appveyor-variables.txt
+		.appveyor\appveyor.after-build.ps1 = .appveyor\appveyor.after-build.ps1
+		.appveyor\appveyor.after-deployment.ps1 = .appveyor\appveyor.after-deployment.ps1
+		.appveyor\appveyor.before-build.ps1 = .appveyor\appveyor.before-build.ps1
+		.appveyor\appveyor.before-deployment.ps1 = .appveyor\appveyor.before-deployment.ps1
+		.appveyor\appveyor.init.ps1 = .appveyor\appveyor.init.ps1
+		.appveyor\appveyor.install.ps1 = .appveyor\appveyor.install.ps1
 		..\appveyor.yml = ..\appveyor.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{D9D3FE65-1338-426E-9A13-9D71A8FDC567}"
+	ProjectSection(SolutionItems) = preProject
+		.appveyor\modules\Send-PushBulletMessage.psm1 = .appveyor\modules\Send-PushBulletMessage.psm1
+		.appveyor\modules\Set-BuildVersion.psm1 = .appveyor\modules\Set-BuildVersion.psm1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{5C23B540-8B59-4D34-93D7-6660583F1B16}"
+	ProjectSection(SolutionItems) = preProject
+		.build\BuildPSIEVM.msbuild = .build\BuildPSIEVM.msbuild
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".targets", ".targets", "{A36414B7-E6F1-4072-97C8-1A56B5DE31A9}"
+	ProjectSection(SolutionItems) = preProject
+		.build\MSBuild.Community.Tasks.dll = .build\MSBuild.Community.Tasks.dll
+		.build\MSBuild.Community.Tasks.targets = .build\MSBuild.Community.Tasks.targets
+		.build\MSBuild.Deployment.Tasks.dll = .build\MSBuild.Deployment.Tasks.dll
+		.build\MSBuild.Deployment.Tasks.pdb = .build\MSBuild.Deployment.Tasks.pdb
+		.build\MSBuild.Deployment.Tasks.Targets = .build\MSBuild.Deployment.Tasks.Targets
+		.build\MSBuild.Deployment.Tasks.XML = .build\MSBuild.Deployment.Tasks.XML
+		.build\MSBuild.Deployment.Tasks.xsd = .build\MSBuild.Deployment.Tasks.xsd
 	EndProjectSection
 EndProject
 Global
@@ -31,5 +60,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D9D3FE65-1338-426E-9A13-9D71A8FDC567} = {F5362226-6504-4984-A249-1E3E7ED9AF26}
+		{A36414B7-E6F1-4072-97C8-1A56B5DE31A9} = {5C23B540-8B59-4D34-93D7-6660583F1B16}
 	EndGlobalSection
 EndGlobal
