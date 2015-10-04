@@ -13,12 +13,12 @@ environment:
 install:
 - ps: .\psievm\.appveyor\appveyor.install.ps1
 before_build:
-- ps: .\psievm\.appveyor\.appveyor.before-build.ps1
+- ps: .\psievm\.appveyor\appveyor.before-build.ps1
 build:
   project: .\psievm\.build\BuildPSIEVM.msbuild
   verbosity: normal
 after_build:
-- ps: .\psievm\.appveyor\.appveyor.before-after.ps1
+- ps: .\psievm\.appveyor\appveyor.after-build.ps1
 artifacts:
 - path: '**\bin\**\psievm.ps*1'
   name: PSModule
