@@ -1,9 +1,11 @@
-$tag = "psievm-v0.1.18.27815";
-$url = "https://github.com/camalot/psievm/releases/download/$tag/$tag.zip"
+$version = "0.1.18.27815";
+
+$url = "https://github.com/camalot/psievm/releases/download/psievm-v${version}/psievm.${version}.zip"
 if ($env:TEMP -eq $null) {
   $env:TEMP = (Join-Path $env:SystemDrive 'temp');
 }
-$psievmTempDir = (Join-Path $env:TEMP "psievm");
+
+$tempDir = (Join-Path $env:TEMP "psievm");
 if(!(Test-Path -Path $tempDir)) {
   New-Item -Path $tempDir -ItemType Directory | Out-Null;
 }
@@ -39,4 +41,4 @@ Download-File -url 'https://chocolatey.org/7za.exe' -file "$7zaExe";
 
 # unzip the package
 Write-Host "Extracting $file to $modulesPath...";
-Start-Process "$7zaExe" -ArgumentList "x -o`"$modulesPath`" -y `"$file`"" -Wait -NoNewWindow;
+Start-Process "$7zaExe" -ArgumentList "x -o`"$modulesPath`" -y `"$file`"" -Wait -NoNewWindow | Write-Host;
