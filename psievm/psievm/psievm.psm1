@@ -228,11 +228,11 @@ function Get-IEVM {
 		# No alternate VM Location is specified, download from ms
 		if($AlternateVMLocation -eq "" -or $AlternateVMLocation -eq $null) {
 			$buildNumber = "20141027";
-			$baseURL = "https://az412801.vo.msecnd.net/vhd/VMBuild_{0}/{3}/IE{1}/Windows/IE{1}.{3}{2}.For.Windows.{4}.zip";		
+			$baseURL = "https://az412801.vo.msecnd.net/vhd/VMBuild_{0}/{4}/IE{1}/Windows/IE{1}.{3}{2}.For.Windows.{4}.zip";		
 			switch -Regex ($IEVersion) {
 				"^edge$" {
 					$buildNumber = "20150801";
-					$baseURL = "https://az792536.vo.msecnd.net/vms/VMBuild_{0}/{3}/MS{1}/Windows/Microsoft%20{1}.{3}{2}.For.Windows.{4}.zip";
+					$baseURL = "https://az792536.vo.msecnd.net/vms/VMBuild_{0}/{4}/MS{1}/Windows/Microsoft%20{1}.{3}{2}.For.Windows.{4}.zip";
 				}
 			}
 			$url = $baseURL -f $buildNumber, $IEVersion, $OS, @{$true="";$false="Win"}[$OS -imatch "^(xp|vista)$"], $VMHost;
