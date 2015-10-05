@@ -7,7 +7,7 @@
 
 #### Installation
 
-Manual installation can be done by downloading the latest PSIEVM module from the releases and extract to one of the $PSModuleRoot paths. This is usually *$env:USERPROFILE\Document\WindowsPowerShell\Modules*.
+    PS > iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievmInstall.ps1"));
 
 
 **Note: PowerShell Gallery installation is not yet available**
@@ -24,7 +24,7 @@ Installation can be done from the [PowerShell Gallery][9]. Installing modules fr
     PS > Get-IEVM -OS XP -IEVersion 6  
 
 ## Parameters
-    
+
 | Name                	| Required 	|   Type   	|   Default  	|
 |---------------------	|:--------:	|:--------:	|:----------:	|
 | OS                  	|    YES   	| String   	| [Empty]    	|
