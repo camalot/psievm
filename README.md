@@ -7,12 +7,16 @@
 
 #### Installation
 
+Manual installation can be done by downloading the latest PSIEVM module from the releases and extract to one of the $PSModuleRoot paths. This is usually *$env:USERPROFILE\Document\WindowsPowerShell\Modules*.
+
+
+**Note: PowerShell Gallery installation is not yet available**
+
 Installation can be done from the [PowerShell Gallery][9]. Installing modules from the Gallery requires the latest version of the PowerShellGet module, which is available in [Windows 10][10] or in [Windows Management Framework (WMF) 5.0][11].
 
 
     PS > Install-Module psievm
 
-Manual installation can be done by downloading the latest PSIEVM module from the releases and extract to one of the $PSModuleRoot paths. This is usually *$env:USERPROFILE\Document\WindowsPowerShell\Modules*.
 
 #### Usage
 

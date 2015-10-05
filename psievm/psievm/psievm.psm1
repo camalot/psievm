@@ -18,9 +18,7 @@ this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
 
 #>
 
-$PSIEVMMANIFEST = iex (Get-Content -Path "$PSScriptRoot\psievm.psd1" -Raw);
 
-$PSIEVMVERSION = $PSIEVMMANIFEST.ModuleVersion;
 $PSIEVM = "psievm";
 
 #region Exported Functions 
@@ -118,11 +116,11 @@ function Get-IEVM {
 		# Set the dynamic parameters' name
 		$ievParam = "IEVersion";
 		# Create the dictionary 
-		$RuntimeParameterDictionary = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameterDictionary;
+		$RuntimeParameterDictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary;
 		# Create the collection of attributes
-		$AttributeCollection = New-Object -TypeName System.Collections.ObjectModel.Collection[System.Attribute];
+		$AttributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute];
 		# Create and set the parameters' attributes
-		$ParameterAttribute = New-Object -TypeName System.Management.Automation.ParameterAttribute;
+		$ParameterAttribute = New-Object System.Management.Automation.ParameterAttribute;
 		$ParameterAttribute.Mandatory = $true;
 		$ParameterAttribute.Position = 1;
 
@@ -133,11 +131,21 @@ function Get-IEVM {
 		switch -Regex ($OS) {
 			"^(win(dows)?)?\s?xp$" {
 				$OS = "XP";
-				$arrSet = @("6","8");
+				$arrSet = @("6", "8");
+				# this happens early... I don't think this will work 
+				# because VMHost is not yet set so it will go with all VMHosts.
+				#if($VMHost -eq "VirtualBox" -or $VMHost -eq $null) {
+				#	# we can upgrade xp to ie7
+				#	$arrSet = @("6", "7", "8");
+				#}
 			}
 			"^(win(dows)?)?\s?vista$" {
 				$OS = "Vista";
 				$arrSet = @("7");
+				#if($VMHost -eq "VirtualBox" -or $VMHost -eq $null) {
+				#	# we can upgrade xp to ie7
+				#	$arrSet = @("7", "8", "9");
+				#}
 			}
 			"^(win(dows)?)?\s?7$" {
 				$OS = "7";
@@ -156,23 +164,24 @@ function Get-IEVM {
 				$arrSet = @("Edge");
 			}
 		}
-		$ValidateSetAttribute = New-Object -TypeName System.Management.Automation.ValidateSetAttribute($arrSet);
+		$ValidateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($arrSet);
 		# Add the ValidateSet to the attributes collection
 		$AttributeCollection.Add($ValidateSetAttribute);
 		# Create and return the dynamic parameter
-		$RuntimeParameter = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameter($ievParam, [string], $AttributeCollection);
+		$RuntimeParameter = New-Object System.Management.Automation.RuntimeDefinedParameter($ievParam, [string], $AttributeCollection);
 		$RuntimeParameterDictionary.Add($ievParam, $RuntimeParameter);
 		return $RuntimeParameterDictionary;
 	}
 
 	begin {
-
-		Write-Host "$PSIEVM v$PSIEVMVERSION" -BackgroundColor DarkBlue -ForegroundColor White;
-
 		$VMUser = "IEUser";
 		$VMPassword = "Passw0rd!";
 		$IEVersion = $PsBoundParameters[$ievParam];
+		$IEUpgrade = $null;
 		Write-Host "Initializing for VMHost '$VMHost'" -BackgroundColor Gray -ForegroundColor Black;
+
+		$vmName = ("IE{0} - Win{1}" -f $IEVersion, $OS);
+		$vmPath = (Join-Path -Path $VMRootPath -ChildPath $vmName);
 
 		switch ($VMHost) {
 			"HyperV" {
@@ -183,6 +192,19 @@ function Get-IEVM {
 			}
 			"VirtualBox" {
 				$vmext = "ova";
+				# support upgrading the OS to other versions using upgrade packages.
+				switch -Regex ( "$OS$IEVersion" ) {
+					"xp7" {
+						$IEUpgrade = $IEVersion;
+						$IEVersion = "6";
+						Write-Host "Setting XP upgrade on boot from IE $IEVersion to IE $IEUpgrade" -BackgroundColor DarkYellow -ForegroundColor Black;
+					}
+					"vista(8|9)$" {
+						$IEUpgrade = $IEVersion;
+						$IEVersion = "7";
+						Write-Host "Setting Vista upgrade on boot from IE $IEVersion to IE $IEUpgrade" -BackgroundColor DarkYellow -ForegroundColor Black;
+					}
+				}
 			}
 			"Vagrant" {
 				$vmext = "box";
@@ -223,11 +245,9 @@ function Get-IEVM {
 				@{$true="";$false="/"}[$AlternateVMLocation -match "(\\|\/)$"];
 			$url = $baseURL;
 		}
-
-		$vmName = ("IE{0} - Win{1}" -f $IEVersion, $OS);
-		$vmPath = (Join-Path -Path $VMRootPath -ChildPath $vmName);
 		
-		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${vmName}.${vmext}" );
+		$baseVMName = ("IE$IEVersion - Win$OS");
+		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${baseVMName}.${vmext}" );
 		$zip = (Join-Path -Path $vmPath -ChildPath "${vmName}.zip");
 	}
 	
@@ -263,6 +283,8 @@ function Get-IEVM {
 				Write-Host "VM import file '$vmImportFile' not found." -BackgroundColor Red -ForegroundColor White;
 				return;
 			}
+			# Add the VMRootPath to the shares.
+			#$Shares.Add($VMRootPath) | Out-Null;
 			$importSuccess = Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -Shares $Shares;
 			if(!$importSuccess) {
 				Write-Host "VM import failed." -BackgroundColor Red -ForegroundColor White;
@@ -270,7 +292,7 @@ function Get-IEVM {
 			}
 		}
 
-		Start-VMHost -VMHost $VMHost -VMName $vmName;
+		Start-VMHost -VMHost $VMHost -VMName $vmName -IEUpgrade $IEUpgrade -VMRootPath $VMRootPath;
 	}
 }
 
@@ -320,11 +342,15 @@ function Start-VMHost {
 		[Parameter(Mandatory=$true, Position=0)]
 		[string] $VMHost,
 		[Parameter(Mandatory=$true, Position=1)]
-		[string] $VMName
+		[string] $VMName,
+		[Parameter(Mandatory=$false, Position=2)]
+		[string] $IEUpgrade,
+		[Parameter(Mandatory=$false, Position=3)]
+		[string] $VMRootPath
 	);
 	switch($VMHost) {
 		"VirtualBox" {
-			return Start-VBoxVM -VMName $VMName;
+			return Start-VBoxVM -VMName $VMName -IEUpgrade $IEUpgrade -VMRootPath $VMRootPath;
 		}
 		default {
 			return $false;
@@ -345,7 +371,6 @@ function Import-VBoxImage {
 		[string] $ImportFile,
 		[Parameter(Mandatory=$false, Position=4)]
 		[string[]] $Shares = @()
-
 	);
 	try {
 		$vbunit = "11";
@@ -376,6 +401,7 @@ function Import-VBoxImage {
 		Write-Host ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
 		(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
+
 		return $true;
 	} catch [System.Exception] {
 		return $false;
@@ -385,11 +411,21 @@ function Import-VBoxImage {
 function Start-VBoxVM {
 	Param (
 		[Parameter(Mandatory=$true, Position=0)]
-		[string] $VMName
+		[string] $VMName,
+		[Parameter(Mandatory=$false, Position=1)]
+		[string] $IEUpgrade,
+		[Parameter(Mandatory=$false, Position=2)]
+		[string] $VMRootPath
 	);
 	$vbm = Get-VBoxManageExe;
 	Write-Host "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
 	& $vbm startvm `"$VMName`";
+
+	
+	#if($IEUpgrade -ne $null -and $IEUpgrade -ne "") {
+	#	Invoke-VBoxUpgrade -OS $OS -IEUpgradeVersion $IEUpgrade -VMName $VMName -VMRootPath $VMRootPath;
+	#}
+
 }
 
 function Test-VBoxVM {
@@ -423,8 +459,18 @@ function Invoke-RemoteVBoxCommand {
 	);
 	$vbm = Get-VBoxManageExe;
 	Write-Host "Executing `"$Command $Arguments`" on `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-	(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | select-object @{$true=$_.ToString();$false=""}[$_ -ne $null] | Write-Host;
+	(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Host;
 }
+
+#function Invoke-VBoxCopy {
+#	Param (
+#		[string] $VMName,
+#		[string] $Source,
+#		[string] $Destination
+#	);
+
+#	Invoke-RemoteVBoxCommand -VMName $VMName -Command "cmd.exe" -Arguments "/c copy `"E:\\$Source`" `"$Destination`"";
+#}
 
 function Get-VBoxManageExe {
 	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","${env:ProgramFiles}\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
@@ -434,6 +480,57 @@ function Get-VBoxManageExe {
 		& $choc install virtualbox vboxguestadditions.install -y | Write-Host;
 	}
 	return $vbm;
+}
+
+function Invoke-VBoxUpgrade {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[string] $OS,
+		[Parameter(Mandatory=$true, Position=1)]
+		[string] $IEUpgradeVersion,
+		[Parameter(Mandatory=$true, Position=2)]
+		[string] $VMName,
+		[Parameter(Mandatory=$true, Position=3)]
+		[string] $VMRootPath
+	);
+	$urls = @{
+		"WinXPIE7" = "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe";
+		"WinVistaIE8" = "http://download.microsoft.com/download/F/8/8/F88F09A2-A315-44C0-848E-48476A9E1577/IE8-WindowsVista-x86-ENU.exe";
+		"WinVistaIE9" = "http://download.microsoft.com/download/0/8/7/08768091-35BC-48E0-9F7F-B9802A0EE2D6/IE9-WindowsVista-x86-enu.exe";
+	}
+
+	$key = "Win${OS}IE${IEUpgradeVersion}";
+	if(!($urls.ContainsKey($key))) {
+		throw [ArgumentException] "Unsupported upgrade Win${OS} -> IE $IEUpgradeVersion";
+	}
+
+	$upgrade = "$key-upgrade.exe";
+	$upgradePath = (Join-Path $VMRootPath -ChildPath $upgrade);
+	Start-BitsTransfer -Source $urls[$key] -Destination $upgradePath;
+	Invoke-VBoxCopy -VMName $VMName -Source $upgrade -Destination "c:\users\IEUser\downloads\$upgrade";
+
+}
+function Wait-VBoxGuestControl {
+	try {
+		$vbm = Get-VBoxManageExe;
+		Write-Host "Waiting for Guest Additions Control Process (Max 3 minutes wait)." -BackgroundColor Gray -ForegroundColor Black -NoNewline;
+		$timeout = new-timespan -Minutes 3
+		$sw = [diagnostics.stopwatch]::StartNew()
+		while ($sw.elapsed -lt $timeout){
+			$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
+			if($r -match "Additions\srun\slevel\:\s+3") {
+				# vm does not exist.
+				Write-Host "Guest Additions Ready." -BackgroundColor Gray -ForegroundColor Black;
+				return $true;
+			}
+			Write-Host "." -NoNewline -BackgroundColor Gray -ForegroundColor Black;
+			Start-Sleep -Seconds 1;
+		}
+		Write-Host "Guest Additions wait timed out." -BackgroundColor Gray -ForegroundColor Black;
+		return $false;
+	} catch {
+		return $false;
+	}
 }
 #endregion 
 
@@ -451,10 +548,11 @@ function Get-ChocolateyExe {
 }
 
 function Invoke-InstallChocolatey {
-	Invoke-Expression -Command ((new-object -TypeName net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
+	Invoke-Expression -Command ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
 
 #endregion 
+
 
 function Test-MD5Hash {
 	Param (
@@ -469,8 +567,11 @@ function Test-MD5Hash {
 		$hashes = @{
 			"VirtualBox" = @{
 				"IE6 - WinXP" = "1FE27A06C0A8E0CB3EE6D27DFE3C634A";
+				"IE7 - WinXP" = "1FE27A06C0A8E0CB3EE6D27DFE3C634A";
 				"IE8 - WinXP" = "EFBF507C4A3CE533C7AE539E59FB8A17";
 				"IE7 - WinVista" = "C144A18EA40848F2611036448D598002";
+				"IE8 - WinVista" = "C144A18EA40848F2611036448D598002";
+				"IE9 - WinVista" = "C144A18EA40848F2611036448D598002";
 				"IE8 - Win7" = "86D481F517CA18D50F298FC9FB1C5A18";
 				"IE9 - Win7" = "61A2B69A5712ABD6566FCBD1F44F7A2B";
 				"IE10 - Win7" = "755F05AF1507CD8940354BF564A08D50";

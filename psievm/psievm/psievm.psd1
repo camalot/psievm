@@ -4,7 +4,7 @@
 RootModule = 'psievm.psm1';
 
 # Version number of this module.
-ModuleVersion = '{{VERSION}}'
+ModuleVersion = '0.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = '1e452af5-f4d1-41c1-88f8-e2de734b9db6'
@@ -58,10 +58,10 @@ PowerShellVersion = '3.0'
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = '*-IEVM';
+FunctionsToExport = 'Get-IEVM';
 
 # Cmdlets to export from this module
-CmdletsToExport = '*-IEVM';
+CmdletsToExport = '';
 
 # Variables to export from this module
 VariablesToExport = ''

@@ -58,8 +58,8 @@
 		<ReplaceFileText
 			InputFilename="$(OutputPath)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).psd1"
 			OutputFilename="$(OutputPath)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).psd1"
-			MatchExpression="\{\{VERSION\}\}"
-			ReplacementText="$(CI_BUILD_VERSION)" />
+			MatchExpression="ModuleVersion\s=\s'\d+\.\d+\.\d+\.\d+'"
+			ReplacementText="ModuleVersion = '$(CI_BUILD_VERSION)'" />
 	</Target>
 
 	<Target Name="CleanBuild">
