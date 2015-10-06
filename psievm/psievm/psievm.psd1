@@ -22,7 +22,7 @@ Copyright = 'Copyright (c) 2015 Ryan Conrad. All rights reserved.'
 Description = 'Gets an IE VM from modern.ie and imports it to the supported VM Host.'
 
 # Minimum version of the Windows PowerShell engine required by this module
-PowerShellVersion = '5.0'
+PowerShellVersion = '3.0'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''

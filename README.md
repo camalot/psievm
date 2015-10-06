@@ -7,7 +7,13 @@
 
 #### Installation
 
-    PS > iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievmInstall.ps1"));
+ From PowerShell console:
+
+    PS:\> iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievmInstall.ps1"));
+
+From command console:
+
+    C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievmInstall.ps1'))"
 
 
 **Note: PowerShell Gallery installation is not yet available**

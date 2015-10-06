@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".git", ".git", "{A36C2979-4
 		..\.gitattributes = ..\.gitattributes
 		..\.gitignore = ..\.gitignore
 		..\LICENSE.md = ..\LICENSE.md
+		..\psievmInstall.ps1 = ..\psievmInstall.ps1
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
@@ -45,6 +46,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".targets", ".targets", "{A3
 		.build\MSBuild.Deployment.Tasks.Targets = .build\MSBuild.Deployment.Tasks.Targets
 		.build\MSBuild.Deployment.Tasks.XML = .build\MSBuild.Deployment.Tasks.XML
 		.build\MSBuild.Deployment.Tasks.xsd = .build\MSBuild.Deployment.Tasks.xsd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".tools", ".tools", "{3A6AFF35-5587-470E-A4D8-FFC06F755211}"
+	ProjectSection(SolutionItems) = preProject
+		.tools\7za.exe = .tools\7za.exe
 	EndProjectSection
 EndProject
 Global

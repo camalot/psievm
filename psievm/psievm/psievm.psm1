@@ -20,6 +20,8 @@ this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
 
 
 $PSIEVM = "psievm";
+#$PSIEVMManifest = iex (Get-Content -Path "$PSScriptRoot\psievm.psd1" -Raw);
+#$PSIEVMVersion = $PSIEVMManifest.ModuleVersion;
 
 #region Exported Functions 
 
@@ -96,7 +98,9 @@ function Get-IEVM {
 	#>
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("XP", "Vista", "7", "8", "8.1", "10", "WinXP","WinVista", "Win7", "Win8", "Win8.1", "Win10", "WindowsXP","WindowsVista", "Windows7", "Windows8", "Windows8.1", "Windows10")]
+		[ValidateSet("XP", "Vista", "7", "8", "8.1", "10", "WinXP","WinVista", "Win7", "Win8", "Win8.1", 
+			"Win10", "WindowsXP","WindowsVista", "Windows7", "Windows8", "Windows8.1", "Windows10",
+			"Windows XP","Windows Vista", "Windows 7", "Windows 8", "Windows 8.1", "Windows 10")]
 		[Parameter(Mandatory=$true, Position=0)]
 		[string] $OS,
 		[Parameter(Mandatory=$false, Position=2)]
@@ -104,7 +108,7 @@ function Get-IEVM {
 		[Parameter(Mandatory=$false,Position=3)]
 		[string] $AlternateVMLocation = "",
 		[Parameter(Mandatory=$false, Position=4)]
-		[ValidateSet("VirtualBox", "VMWare", "VPC", "HyperV", "Vagrant")]
+		[ValidateSet("VirtualBox" <#, "VMWare", "VPC", "HyperV", "Vagrant"#>)]
 		[string] $VMHost = "VirtualBox",
 		[Parameter(Mandatory=$false, Position=5)]
 		[bool] $IgnoreInvalidMD5 = $false,
@@ -115,6 +119,8 @@ function Get-IEVM {
 	DynamicParam {
 		# Set the dynamic parameters' name
 		$ievParam = "IEVersion";
+		$ievAlias = "IE";
+
 		# Create the dictionary 
 		$RuntimeParameterDictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary;
 		# Create the collection of attributes
@@ -167,6 +173,9 @@ function Get-IEVM {
 		$ValidateSetAttribute = New-Object System.Management.Automation.ValidateSetAttribute($arrSet);
 		# Add the ValidateSet to the attributes collection
 		$AttributeCollection.Add($ValidateSetAttribute);
+		# Create the alias attribute
+		$AliasAttribute = New-Object System.Management.Automation.AliasAttribute($ievAlias);
+		$AttributeCollection.Add($AliasAttribute);
 		# Create and return the dynamic parameter
 		$RuntimeParameter = New-Object System.Management.Automation.RuntimeDefinedParameter($ievParam, [string], $AttributeCollection);
 		$RuntimeParameterDictionary.Add($ievParam, $RuntimeParameter);
@@ -252,6 +261,9 @@ function Get-IEVM {
 	}
 	
 	process {
+
+		#Write-Host "$PSIEVM v$PSIEVMVersion" -ForegroundColor Yellow;
+
 		# if the vmPath doesnt exist, create it.
 		if(!(Test-Path -Path $vmPath)) {
 			Write-Host ("Creating path `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
@@ -274,7 +286,7 @@ function Get-IEVM {
 					}
 				}
 				Write-Host ("Extracting `"$zip`" -> `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
-				Expand-Archive -Path $zip -DestinationPath (Split-Path -Path $zip) -Force;
+				Expand-7ipArchive -Path $zip -DestinationPath (Split-Path $zip);
 				Write-Host ("Deleting `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				Remove-Item -Path $zip -Force | Out-Null;
 			}
@@ -553,6 +565,18 @@ function Invoke-InstallChocolatey {
 
 #endregion 
 
+function Get-FileMD5Hash {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[string] $Path
+	)
+	$md5 = new-object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider;
+	$stream = [System.IO.File]::Open("$Path",[System.IO.Filemode]::Open, [System.IO.FileAccess]::Read);
+	$hash = [System.BitConverter]::ToString($md5.ComputeHash($stream)) -replace "-", "";
+	$stream.Close();
+	return $hash;
+}
+
 
 function Test-MD5Hash {
 	Param (
@@ -583,9 +607,48 @@ function Test-MD5Hash {
 		};
 	}
 	process {
-		$hash = (Get-FileHash -Path $Path -Algorithm MD5).Hash;
+		if((Get-Command -Name "Get-FileHash") -eq $null) {
+			$hash = (Get-FileMD5Hash -Path $Path);
+		} else {
+			$hash = (Get-FileHash -Path $Path -Algorithm MD5);
+		}
 		$chash = $hashes[$VMHost][$VMName];
 		Write-Host "MD5 Compare: '$hash' -> '$chash'" -BackgroundColor Gray -ForegroundColor Black;
 		return $hash -ieq $chash;
+	}
+}
+
+function Download-File {
+  Param (
+    [string] $Url,
+    [string] $File
+  );
+  $downloader = (new-object System.Net.WebClient);
+  $downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
+  $downloader.DownloadFile($Url, $File);
+}
+
+function Expand-7ipArchive {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[string] $Path,
+		[Parameter(Mandatory=$true, Position=1)]
+		[string] $DestinationPath
+	);
+
+	if((Get-Command -Name "Expand-Archive") -eq $null) {
+		$toolsDir = (Join-Path $PSScriptRoot "tools");
+		if(!(Test-Path -Path $toolsDir)) {
+			New-Item -Path $toolsDir -ItemType Directory | Out-Null;
+		}
+		$7zaExe = (Join-Path $toolsDir '7za.exe');
+		if(!(Test-Path -Path $7zaExe)) {
+			# download 7zip
+			Write-Host "Download 7Zip commandline tool";
+			Download-File -Url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -File "$7zaExe";
+		}
+		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
+	} else {
+		Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force;
 	}
 }

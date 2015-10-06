@@ -1,4 +1,10 @@
-$version = "0.1.18.27815";
+Param(
+	[Parameter(Mandatory=$false, Position=0)]
+	[Alias("v")]
+	[Version] $Version
+)
+
+$version = "0.1.21.27815";
 
 $url = "https://github.com/camalot/psievm/releases/download/psievm-v${version}/psievm.${version}.zip"
 if ($env:TEMP -eq $null) {
@@ -36,9 +42,8 @@ Download-File -url $url -file $file;
 # download 7zip
 Write-Host "Download 7Zip commandline tool";
 $7zaExe = (Join-Path $tempDir '7za.exe');
-# yep, download the one that chocolatey uses :D
-Download-File -url 'https://chocolatey.org/7za.exe' -file "$7zaExe";
+Download-File -url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -file "$7zaExe";
 
 # unzip the package
-Write-Host "Extracting $file to $modulesPath...";
+Write-Host "Extracting $file to $modulesPath";
 Start-Process "$7zaExe" -ArgumentList "x -o`"$modulesPath`" -y `"$file`"" -Wait -NoNewWindow | Write-Host;
