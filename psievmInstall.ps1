@@ -1,12 +1,10 @@
 Param(
 	[Parameter(Mandatory=$false, Position=0)]
 	[Alias("v")]
-	[Version] $Version
+	[Version] $Version = "0.1.21.27915"
 )
 
-$version = "0.1.21.27915";
-
-$url = "https://github.com/camalot/psievm/releases/download/psievm-v${version}/psievm.${version}.zip"
+$url = "https://github.com/camalot/psievm/releases/download/psievm-v${Version}/psievm.${Version}.zip"
 if ($env:TEMP -eq $null) {
   $env:TEMP = (Join-Path $env:SystemDrive 'temp');
 }
