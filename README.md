@@ -4,7 +4,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true)](https://ci.appveyor.com/project/camalot/psievm)
 
-
+You may recieve an error while installing using these commands below if the image above says "build pending"
 #### Installation
 
  From PowerShell console:
