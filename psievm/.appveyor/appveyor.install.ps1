@@ -3,7 +3,7 @@
 #Write-Host "Loading Choco Log";
 #(Get-Content -Path "C:\ProgramData\chocolatey\logs\chocolatey.log" -Raw) | Write-Host;
 
-$ps5path = (Join-Path $env:APPVEYOR_BUILD_FOLDER "ps5");
+<#$ps5path = (Join-Path $env:APPVEYOR_BUILD_FOLDER "ps5");
 if(!(Test-Path -Path $ps5path)) {
 	New-Item -Path $ps5path -ItemType Directory | Out-Null;
 }
@@ -18,9 +18,9 @@ if(Test-Path -Path $ps5msu) {
 }
 
 if ( (Get-Module -Name "PowerShellGet") -eq $null ) {
-	Write-Error "Unable to locate PowerShellGet module";
+	Write-Warning "Unable to locate PowerShellGet module";
 	$Host.SetShouldExit(404);
 }
 
-Get-PackageProvider -Name NuGet -ForceBootstrap;
+Get-PackageProvider -Name NuGet -ForceBootstrap;#>
 # Install-Module -Name PSScriptAnalyzer -Force;
