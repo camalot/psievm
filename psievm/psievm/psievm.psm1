@@ -610,7 +610,7 @@ function Test-MD5Hash {
 		if((Get-Command -Name "Get-FileHash") -eq $null) {
 			$hash = (Get-FileMD5Hash -Path $Path);
 		} else {
-			$hash = (Get-FileHash -Path $Path -Algorithm MD5);
+			$hash = (Get-FileHash -Path $Path -Algorithm MD5).Hash;
 		}
 		$chash = $hashes[$VMHost][$VMName];
 		Write-Host "MD5 Compare: '$hash' -> '$chash'" -BackgroundColor Gray -ForegroundColor Black;
