@@ -2,7 +2,7 @@ version: 0.1.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
-os: Unstable
+os: Windows Server 2012 R2
 init:
 - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 environment:
