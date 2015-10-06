@@ -1,4 +1,4 @@
-$Version = "0.1.21.27915";
+$Version = "0.1.28.27915";
 
 $url = "https://github.com/camalot/psievm/releases/download/psievm-v${Version}/psievm.${Version}.zip"
 if ($env:TEMP -eq $null) {
