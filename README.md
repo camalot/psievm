@@ -1,10 +1,14 @@
-# psievm
+# psievm [![Build status](https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true)](https://ci.appveyor.com/project/camalot/psievm)
 
-*psievm* is a powershell module for standing up an IE VM quickly and without hassle.
+*psievm* is a powershell module for standing up an IE VM quickly and without hassle. This will do all the steps needed to get the VM running. 
 
-[![Build status](https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true)](https://ci.appveyor.com/project/camalot/psievm)
+- Install the VM Host (if needed, and supported)
+- Download the VM image
+- Extract the image
+- Import the image to VirtualBox
+- Take the initial snapshot
+- Start the VM Host with the VM
 
-You may recieve an error while installing using these commands below if the image above says "build pending"
 #### Installation
 
  From PowerShell console:
@@ -14,7 +18,6 @@ You may recieve an error while installing using these commands below if the imag
 From command console:
 
     C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievmInstall.ps1'))"
-
 
 #### Usage
 
