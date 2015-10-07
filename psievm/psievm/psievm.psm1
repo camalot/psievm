@@ -111,7 +111,7 @@ function Get-IEVM {
 		[ValidateSet("VirtualBox" <#, "VMWare", "VPC", "HyperV", "Vagrant"#>)]
 		[string] $VMHost = "VirtualBox",
 		[Parameter(Mandatory=$false, Position=5)]
-		[bool] $IgnoreInvalidMD5 = $false,
+		[switch] $IgnoreInvalidMD5,
 		[Parameter(Mandatory=$false, Position=6)]
 		[string] $VMRootPath = $pwd
 	);
@@ -280,8 +280,9 @@ function Get-IEVM {
 			if((Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
 				Write-Host ("Validating MD5 File Hash `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				if(!(Test-MD5Hash -Path $zip -VMName $vmName -VMHost $VMHost)) {
-					Write-Host "MD5 hash validation of zip '$zip' failed." -BackgroundColor @{$true="Yellow";$false="Red"}[$IgnoreInvalidMD5] -ForegroundColor @{$true="Black";$false="White"}[$IgnoreInvalidMD5];
-					if(!$IgnoreInvalidMD5) {
+					$shouldIgnoreMD5Validation = $PSBoundParameters.ContainsKey('IgnoreInvalidMD5')
+					Write-Host "MD5 hash validation of zip '$zip' failed." -BackgroundColor @{$true="Yellow";$false="Red"}[$shouldIgnoreMD5Validation] -ForegroundColor @{$true="Black";$false="White"}[$shouldIgnoreMD5Validation];
+					if(!$shouldIgnoreMD5Validation) {
 						return;
 					}
 				}
