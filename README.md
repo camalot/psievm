@@ -23,15 +23,15 @@ From command console:
 
 ## Parameters
 
-| Name                	| Required 	|   Type   	|   Default  	|
-|---------------------	|:--------:	|:--------:	|:----------:	|
-| OS                  	|    YES   	| String   	| [Empty]    	|
-| IEVersion           	|    YES   	| String   	| [Empty]    	|
-| Shares              	|    NO    	| String[] 	| [Empty]    	|
-| AlternateVMLocation 	|    NO    	| String   	| [Empty]    	|
-| VMHost              	|    NO    	| String   	| VirtualBox 	|
-| IgnoreInvalidMD5    	|    NO    	| Switch  	| $False     	|
-| VMRootPath            |    NO     | String    | $PWD        |
+| Name                	| Required 	|   Type   	|   Default  	|  Description  |
+|---------------------	|:--------:	|:--------:	|:----------:	|-------------- |
+| OS                  	|    YES   	| String   	| [Empty]    	| The Windows OS Version |
+| IEVersion           	|    YES   	| String   	| [Empty]    	| The IE Version |
+| Shares              	|    NO    	| String[] 	| [Empty]    	|  |
+| AlternateVMLocation 	|    NO    	| String   	| [Empty]    	| The alternate location to use to find the VM images |
+| VMHost              	|    NO    	| String   	| VirtualBox 	| The VM Host |
+| IgnoreInvalidMD5    	|    NO    	| Switch  	| $False     	| If the script should ignore failed MD5 hash validation |
+| VMRootPath            |    NO     | String    | $PWD        | The location to put the VM images |
 
 ### OS / IEVersion
 This is the version of the OS that you want hosted and the version of IE you want with it. Here are the supported values:
