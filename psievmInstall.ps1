@@ -42,7 +42,6 @@ function Install-PSIEVM {
 	Write-Host "Extracting $file to $modulesPath";
 	Start-Process "$7zaExe" -ArgumentList "x -o`"$modulesPath`" -y `"$file`"" -Wait -NoNewWindow;
 
-
 	if(Test-Path -Path $tempDir) {
 		Write-Host "Clean up temp directory [$tempDir]";
 		Remove-Item -Path $tempDir -Force -Recurse | Out-Null;

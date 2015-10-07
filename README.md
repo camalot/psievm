@@ -16,14 +16,6 @@ From command console:
     C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievmInstall.ps1'))"
 
 
-**Note: PowerShell Gallery installation is not yet available**
-
-Installation can be done from the [PowerShell Gallery][9]. Installing modules from the Gallery requires the latest version of the PowerShellGet module, which is available in [Windows 10][10] or in [Windows Management Framework (WMF) 5.0][11].
-
-
-    PS > Install-Module psievm
-
-
 #### Usage
 
     PS > Import-Module psievm
@@ -38,7 +30,7 @@ Installation can be done from the [PowerShell Gallery][9]. Installing modules fr
 | Shares              	|    NO    	| String[] 	| [Empty]    	|
 | AlternateVMLocation 	|    NO    	| String   	| [Empty]    	|
 | VMHost              	|    NO    	| String   	| VirtualBox 	|
-| IgnoreInvalidMD5    	|    NO    	| Boolean  	| $False     	|
+| IgnoreInvalidMD5    	|    NO    	| Switch  	| $False     	|
 | VMRootPath            |    NO     | String    | $PWD        |
 
 ### OS / IEVersion
