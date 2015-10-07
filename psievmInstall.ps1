@@ -29,8 +29,7 @@ function Install-PSIEVM {
 	if(!(Test-Path -Path $psievmModulePath)) {
 		New-Item -Path $psievmModulePath -ItemType Directory | Out-Null;
 	}
-
-	
+		
 	# download the package
 	Download-File -url $url -file $file;
 
@@ -42,6 +41,12 @@ function Install-PSIEVM {
 	# unzip the package
 	Write-Host "Extracting $file to $modulesPath";
 	Start-Process "$7zaExe" -ArgumentList "x -o`"$modulesPath`" -y `"$file`"" -Wait -NoNewWindow;
+
+
+	if(Test-Path -Path $tempDir) {
+		Write-Host "Clean up temp directory [$tempDir]";
+		Remove-Item -Path $tempDir -Force -Recurse | Out-Null;
+	}
 }
 
 function Get-LatestGithubRelease {
@@ -67,6 +72,7 @@ function Get-LatestGithubRelease {
 					}
 			}
 	}
+	$webclient = New-Object net.webclient;
 	Write-Host "Getting latest release information from GitHub Repository $Owner/$Repo";
 	$webclient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.52 Safari/537.36");
 	$webclient.Headers.Add("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
