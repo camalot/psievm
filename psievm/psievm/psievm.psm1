@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
------ 
+-----
 this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
 
 #>
@@ -23,7 +23,7 @@ $PSIEVM = "psievm";
 #$PSIEVMManifest = iex (Get-Content -Path "$PSScriptRoot\psievm.psd1" -Raw);
 #$PSIEVMVersion = $PSIEVMManifest.ModuleVersion;
 
-#region Exported Functions 
+#region Exported Functions
 
 function Get-IEVM {
 	<#
@@ -36,7 +36,7 @@ function Get-IEVM {
 	.DESCRIPTION
 
 
-	.PARAMETER OS 
+	.PARAMETER OS
 
 	The OS version. Supported values:
 
@@ -84,7 +84,7 @@ function Get-IEVM {
 	Get-IEVM -OS XP -IEVersion 6 -VMHost VirtualBox
 
 
-	.EXAMPLE 
+	.EXAMPLE
 
 	Get the IE9 on Windows 7 VM for VirtualBox from your company network share
 
@@ -98,7 +98,7 @@ function Get-IEVM {
 	#>
 	[CmdletBinding()]
 	Param (
-		[ValidateSet("XP", "Vista", "7", "8", "8.1", "10", "WinXP","WinVista", "Win7", "Win8", "Win8.1", 
+		[ValidateSet("XP", "Vista", "7", "8", "8.1", "10", "WinXP","WinVista", "Win7", "Win8", "Win8.1",
 			"Win10", "WindowsXP","WindowsVista", "Windows7", "Windows8", "Windows8.1", "Windows10",
 			"Windows XP","Windows Vista", "Windows 7", "Windows 8", "Windows 8.1", "Windows 10")]
 		[Parameter(Mandatory=$true, Position=0)]
@@ -121,7 +121,7 @@ function Get-IEVM {
 		$ievParam = "IEVersion";
 		$ievAlias = "IE";
 
-		# Create the dictionary 
+		# Create the dictionary
 		$RuntimeParameterDictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary;
 		# Create the collection of attributes
 		$AttributeCollection = New-Object System.Collections.ObjectModel.Collection[System.Attribute];
@@ -138,7 +138,7 @@ function Get-IEVM {
 			"^(win(dows)?)?\s?xp$" {
 				$OS = "XP";
 				$arrSet = @("6", "8");
-				# this happens early... I don't think this will work 
+				# this happens early... I don't think this will work
 				# because VMHost is not yet set so it will go with all VMHosts.
 				#if($VMHost -eq "VirtualBox" -or $VMHost -eq $null) {
 				#	# we can upgrade xp to ie7
@@ -237,7 +237,7 @@ function Get-IEVM {
 		# No alternate VM Location is specified, download from ms
 		if($AlternateVMLocation -eq "" -or $AlternateVMLocation -eq $null) {
 			$buildNumber = "20141027";
-			$baseURL = "https://az412801.vo.msecnd.net/vhd/VMBuild_{0}/{4}/IE{1}/Windows/IE{1}.{3}{2}.For.Windows.{4}.zip";		
+			$baseURL = "https://az412801.vo.msecnd.net/vhd/VMBuild_{0}/{4}/IE{1}/Windows/IE{1}.{3}{2}.For.Windows.{4}.zip";
 			switch -Regex ($IEVersion) {
 				"^edge$" {
 					$buildNumber = "20150801";
@@ -249,17 +249,17 @@ function Get-IEVM {
 			# use alternate path for the images (like a share)
 			$baseFile = "IE{0}.{2}{1}.For.Windows.{3}.zip";
 			# combine the paths, validate and add missing slashes if needed
-			$baseUrl = "{0}$AlternateVMLocation{2}{1}" -f (@{$true="";$false="\\"}[$AlternateVMLocation -imatch "^(\\\\|https?:\/\/|[a-z]:\\)"]), 
+			$baseUrl = "{0}$AlternateVMLocation{2}{1}" -f (@{$true="";$false="\\"}[$AlternateVMLocation -imatch "^(\\\\|https?:\/\/|[a-z]:\\)"]),
 				($baseFile -f $IEVersion, $OS,  @{$true="";$false="Win"}[$OS -imatch "^(xp|vista)$"], $VMHost),
 				@{$true="";$false="/"}[$AlternateVMLocation -match "(\\|\/)$"];
 			$url = $baseURL;
 		}
-		
+
 		$baseVMName = ("IE$IEVersion - Win$OS");
 		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${baseVMName}.${vmext}" );
 		$zip = (Join-Path -Path $vmPath -ChildPath "${vmName}.zip");
 	}
-	
+
 	process {
 
 		#Write-Host "$PSIEVM v$PSIEVMVersion" -ForegroundColor Yellow;
@@ -311,7 +311,7 @@ function Get-IEVM {
 
 Set-Alias -Name psievm -Value Get-IEVM;
 
-#endregion 
+#endregion
 
 function Import-VMImage {
 	Param (
@@ -371,8 +371,8 @@ function Start-VMHost {
 	};
 }
 
-#region VirtualBox 
-function Import-VBoxImage { 
+#region VirtualBox
+function Import-VBoxImage {
 	Param (
 		[Parameter(Mandatory=$true, Position=0)]
 		[string] $IEVersion,
@@ -395,7 +395,7 @@ function Import-VBoxImage {
 				$vbunit = "10";
 			}
 		};
-	
+
 		$vbm = Get-VBoxManageExe;
 		$vbox = (Join-Path -Path $vmPath -ChildPath "${vmName}.vbox");
 		$disk = (Join-Path -Path $vmPath -ChildPath ("$VMName-disk1.vmdk"));
@@ -434,7 +434,7 @@ function Start-VBoxVM {
 	Write-Host "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
 	& $vbm startvm `"$VMName`";
 
-	
+
 	#if($IEUpgrade -ne $null -and $IEUpgrade -ne "") {
 	#	Invoke-VBoxUpgrade -OS $OS -IEUpgradeVersion $IEUpgrade -VMName $VMName -VMRootPath $VMRootPath;
 	#}
@@ -452,9 +452,13 @@ function Test-VBoxVM {
 		$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
 		$vmnEscaped = [Regex]::Escape($VMName);
 		if($r -match "Could\snot\sfind\sa\sregistered\smachine\snamed\s'$vmnEscaped'") {
+			Write-Warning $r;
+
+			Write-Host ("VM Image not found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
 			# vm does not exist.
 			return $false;
 		}
+		Write-Host ("VM Image found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
 		return $true;
 	} catch {
 		return $false;
@@ -545,9 +549,9 @@ function Wait-VBoxGuestControl {
 		return $false;
 	}
 }
-#endregion 
+#endregion
 
-#region Chocolatey 
+#region Chocolatey
 function Get-ChocolateyExe {
 	$cho = "$env:ProgramData\chocolatey\choco.exe";
 	if(!(Test-Path -Path $cho) ) {
@@ -564,7 +568,7 @@ function Invoke-InstallChocolatey {
 	Invoke-Expression -Command ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
 
-#endregion 
+#endregion
 
 function Get-FileMD5Hash {
 	Param (
