@@ -234,28 +234,35 @@ function Get-IEVM {
 			}
 		}
 
+		switch($OS) {
+			"10" {
+				$baseFile = "Microsoft%20{0}.{2}{1}.For.Windows.{3}.zip";
+			}
+			default {
+				$baseFile = "IE{0}.{2}{1}.For.Windows.{3}.zip";
+			}
+		}
+		$baseFile = ($baseFile -f $IEVersion, $OS,  @{$true="";$false="Win"}[$OS -imatch "^(xp|vista)$"], $VMHost);
 		# No alternate VM Location is specified, download from ms
 		if($AlternateVMLocation -eq "" -or $AlternateVMLocation -eq $null) {
 			$buildNumber = "20141027";
-			$baseURL = "https://az412801.vo.msecnd.net/vhd/VMBuild_{0}/{4}/IE{1}/Windows/IE{1}.{3}{2}.For.Windows.{4}.zip";
+			$baseURL = "https://az412801.vo.msecnd.net/vhd/VMBuild_{0}/{2}/IE{1}/Windows/{3}";
 			switch -Regex ($IEVersion) {
 				"^edge$" {
 					$buildNumber = "20150801";
-					$baseURL = "https://az792536.vo.msecnd.net/vms/VMBuild_{0}/{4}/MS{1}/Windows/Microsoft%20{1}.{3}{2}.For.Windows.{4}.zip";
+					$baseURL = "https://az792536.vo.msecnd.net/vms/VMBuild_{0}/{2}/MS{1}/Windows/{3}";
 				}
 			}
-			$url = $baseURL -f $buildNumber, $IEVersion, $OS, @{$true="";$false="Win"}[$OS -imatch "^(xp|vista)$"], $VMHost;
+			$url = $baseURL -f $buildNumber, $IEVersion, $VMHost, $baseFile;
 		} else {
 			# use alternate path for the images (like a share)
-			$baseFile = "IE{0}.{2}{1}.For.Windows.{3}.zip";
 			# combine the paths, validate and add missing slashes if needed
-			$baseUrl = "{0}$AlternateVMLocation{2}{1}" -f (@{$true="";$false="\\"}[$AlternateVMLocation -imatch "^(\\\\|https?:\/\/|[a-z]:\\)"]),
-				($baseFile -f $IEVersion, $OS,  @{$true="";$false="Win"}[$OS -imatch "^(xp|vista)$"], $VMHost),
+			$baseUrl = "{0}$AlternateVMLocation{2}{1}" -f (@{$true="";$false="\\"}[$AlternateVMLocation -imatch "^(\\\\|https?:\/\/|[a-z]:\\)"]), $baseFile,
 				@{$true="";$false="/"}[$AlternateVMLocation -match "(\\|\/)$"];
 			$url = $baseURL;
 		}
 
-		$baseVMName = ("IE$IEVersion - Win$OS");
+		$baseVMName = ("IE$(@{$true="11";$false="$IEVersion"}[$IEVersion -ieq "edge"]) - Win$OS");
 		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${baseVMName}.${vmext}" );
 		$zip = (Join-Path -Path $vmPath -ChildPath "${vmName}.zip");
 	}
@@ -264,14 +271,15 @@ function Get-IEVM {
 
 		#Write-Host "$PSIEVM v$PSIEVMVersion" -ForegroundColor Yellow;
 
-		# if the vmPath doesnt exist, create it.
-		if(!(Test-Path -Path $vmPath)) {
-			Write-Host ("Creating path `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
-			New-Item -Path $vmPath -ItemType Directory | Out-Null;
-		}
-
 		# if the VM does not exist
 		if( !(Test-VMHost -VMHost $VMHost -VMName $vmName) ) {
+
+			# if the vmPath doesnt exist, create it.
+			if(!(Test-Path -Path $vmPath)) {
+				Write-Host ("Creating path `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
+				New-Item -Path $vmPath -ItemType Directory | Out-Null;
+			}
+
 			if(!(Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
 				Write-Host ("Transfer from: `"$url`" -> `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				Start-BitsTransfer -Source $url -Destination $zip;
@@ -452,8 +460,6 @@ function Test-VBoxVM {
 		$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
 		$vmnEscaped = [Regex]::Escape($VMName);
 		if($r -match "Could\snot\sfind\sa\sregistered\smachine\snamed\s'$vmnEscaped'") {
-			Write-Warning $r;
-
 			Write-Host ("VM Image not found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
 			# vm does not exist.
 			return $false;
@@ -607,7 +613,7 @@ function Test-MD5Hash {
 				"IE11 - Win7" = "7AA66EC15A51EE8B0A4AB39353472F07";
 				"IE10 - Win8" = "CAF9FCEF0A4EE13A236BDC7BDB9FF1D3";
 				"IE11 - Win8.1" = "080C652C69359B6742DE547BA594AB2A";
-				"Edge - Win10" = "8A441819E97F8766E25FAA810BD1FF4F";
+				"IE11 - Win10" = "8A441819E97F8766E25FAA810BD1FF4F";
 			}
 		};
 	}
