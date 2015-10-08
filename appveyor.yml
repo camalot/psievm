@@ -35,7 +35,8 @@ deploy:
   auth_token:
     secure: UEgy2H9zJKLi599QoO3qVf5BKFqloRQ246ez9cEgsfV3vooAUfVopMS9+IjRtArL
   artifact: Zip
-  draft: true
+  draft: false
+	prerelease: true
   on:
     branch: master
     CI_DEPLOY_GITHUB: True

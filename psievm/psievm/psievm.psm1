@@ -306,7 +306,7 @@ function Get-IEVM {
 			}
 			# Add the VMRootPath to the shares.
 			#$Shares.Add($VMRootPath) | Out-Null;
-			$importSuccess = Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -Shares $Shares;
+			$importSuccess = Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -VMRootPath $VMRootPath -Shares $Shares;
 			if(!$importSuccess) {
 				Write-Host "VM import failed." -BackgroundColor Red -ForegroundColor White;
 				return;
@@ -323,17 +323,25 @@ Set-Alias -Name psievm -Value Get-IEVM;
 
 function Import-VMImage {
 	Param (
+		[Parameter(Mandatory=$true)]
 		[string] $IEVersion,
+		[Parameter(Mandatory=$true)]
 		[string] $OS,
+		[Parameter(Mandatory=$true)]
 		[string] $VMHost,
+		[Parameter(Mandatory=$true)]
 		[string] $VMName,
+		[Parameter(Mandatory=$true)]
 		[string] $ImportFile,
+		[Parameter(Mandatory=$true)]
+		[string] $VMRootPath,
+		[Parameter(Mandatory=$false)]
 		[string[]] $Shares
 	);
 
 	switch($VMHost) {
 		"VirtualBox" {
-			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -Shares $Shares;
+			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -VMRootPath $VMRootPath -Shares $Shares;
 		}
 		default {
 			return $false;
@@ -360,13 +368,13 @@ function Test-VMHost {
 
 function Start-VMHost {
 	Param (
-		[Parameter(Mandatory=$true, Position=0)]
+		[Parameter(Mandatory=$true)]
 		[string] $VMHost,
-		[Parameter(Mandatory=$true, Position=1)]
+		[Parameter(Mandatory=$true)]
 		[string] $VMName,
-		[Parameter(Mandatory=$false, Position=2)]
+		[Parameter(Mandatory=$false)]
 		[string] $IEUpgrade,
-		[Parameter(Mandatory=$false, Position=3)]
+		[Parameter(Mandatory=$false)]
 		[string] $VMRootPath
 	);
 	switch($VMHost) {
@@ -382,15 +390,17 @@ function Start-VMHost {
 #region VirtualBox
 function Import-VBoxImage {
 	Param (
-		[Parameter(Mandatory=$true, Position=0)]
+		[Parameter(Mandatory=$true)]
 		[string] $IEVersion,
-		[Parameter(Mandatory=$true, Position=1)]
+		[Parameter(Mandatory=$true)]
 		[string] $OS,
-		[Parameter(Mandatory=$true, Position=2)]
+		[Parameter(Mandatory=$true)]
 		[string] $VMName,
-		[Parameter(Mandatory=$true, Position=3)]
+		[Parameter(Mandatory=$true)]
 		[string] $ImportFile,
-		[Parameter(Mandatory=$false, Position=4)]
+		[Parameter(Mandatory=$true)]
+		[string] $VMRootPath,
+		[Parameter(Mandatory=$false)]
 		[string[]] $Shares = @()
 	);
 	try {
@@ -405,8 +415,8 @@ function Import-VBoxImage {
 		};
 
 		$vbm = Get-VBoxManageExe;
-		$vbox = (Join-Path -Path $vmPath -ChildPath "${vmName}.vbox");
-		$disk = (Join-Path -Path $vmPath -ChildPath ("$VMName-disk1.vmdk"));
+		$vbox = (Join-Path -Path $VMRootPath -ChildPath "${$VMName}.vbox");
+		$disk = (Join-Path -Path $VMRootPath -ChildPath ("$VMName-disk1.vmdk"));
 		Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
 		(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
@@ -499,8 +509,7 @@ function Get-VBoxManageExe {
 	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","${env:ProgramFiles}\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
 	if($vbm -eq $null) {
 		Write-Host "Unable to locate VirtualBox tools. Installing via Chocolatey.";
-		$choc = Get-ChocolateyExe;
-		& $choc install virtualbox vboxguestadditions.install -y | Write-Host;
+		Install-ChocolateyApp -Names virtualbox, vboxguestadditions.install
 	}
 	return $vbm;
 }
@@ -574,6 +583,17 @@ function Invoke-InstallChocolatey {
 	Invoke-Expression -Command ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
 
+function Install-ChocolateyApp {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[string[]] $Names
+	);
+
+	$choc = Get-ChocolateyExe;
+	$list = $Names -join " ";
+	& $choc install $list -y | Write-Host;
+}
+
 #endregion
 
 function Get-FileMD5Hash {
@@ -624,6 +644,10 @@ function Test-MD5Hash {
 			$hash = (Get-FileHash -Path $Path -Algorithm MD5).Hash;
 		}
 		$chash = $hashes[$VMHost][$VMName];
+		if( $chash -eq $null -or $chash -eq "" ) {
+			Write-Warning "No Hash Available for $($VMHost):$($VMName)";
+			return $true;
+		}
 		Write-Host "MD5 Compare: '$hash' -> '$chash'" -BackgroundColor Gray -ForegroundColor Black;
 		return $hash -ieq $chash;
 	}
