@@ -1,4 +1,4 @@
-
+#requires -version 3
 function Download-File {
 	Param (
 		[string]$url,
