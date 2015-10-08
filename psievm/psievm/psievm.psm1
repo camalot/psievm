@@ -36,16 +36,17 @@ function Get-IEVM {
 	.DESCRIPTION
 
 
+
 	.PARAMETER OS
 
 	The OS version. Supported values:
 
-	- XP
-	- Vista
-	- 7
-	- 8
-	- 8.1
-	- 10
+	- XP, WinXP, Windows XP
+	- Vista, WinVista, Windows Vista
+	- 7, Win7, Windows 7
+	- 8, Win8, Windows 8
+	- 8.1, Win8.1, Windows 8.1
+	- 10, Win10, Windows 10
 
 	.PARAMETER IEVersion
 
@@ -71,11 +72,15 @@ function Get-IEVM {
 
 	.PARAMETER VMHost
 
-	Defines the VM host to use. Supported VM hosts: VirtualBox, VMWare, VPC, HyperV, Vagrant
+	Defines the VM host to use. Supported VM hosts: VirtualBox
 
 	.PARAMETER IgnoreInvalidMD5
 
-	If $true, it will ignore the zip file MD5 hash check.
+	If exists, it will ignore the zip file MD5 hash check.
+
+	.PARAMETER VMRootPath
+
+	The path to store the VM files.
 
 	.EXAMPLE
 
