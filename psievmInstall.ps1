@@ -14,6 +14,9 @@ function Download-File {
 
 function Install-PSIEVM {
 	begin {
+		Write-Host "Installing PSIEVM PowerShell module";
+		Write-Host "Copyright (c) 2015 Ryan Conrad";
+		Write-Host "License: https://github.com/camalot/psievm/blob/master/LICENSE.md"
 		$url = (Get-LatestGithubRelease -Owner camalot -Repo psievm);
 		if ($env:TEMP -eq $null) {
 			$env:TEMP = (Join-Path $env:SystemDrive 'temp');

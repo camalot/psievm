@@ -24,7 +24,7 @@ From command console:
     PS > Import-Module psievm
     PS > Get-IEVM -OS XP -IEVersion 6  
 
-## Parameters
+#### Parameters
 
 | Name                	| Required 	|   Type   	|   Default  	|  Description  |
 |---------------------	|:--------:	|:--------:	|:----------:	|-------------- |
@@ -36,7 +36,7 @@ From command console:
 | IgnoreInvalidMD5    	|    NO    	| Switch  	| $False     	| If the script should ignore failed MD5 hash validation |
 | VMRootPath            |    NO     | String    | $PWD        | The location to put the VM images |
 
-### OS / IEVersion
+#### OS / IEVersion
 This is the version of the OS that you want hosted and the version of IE you want with it. Here are the supported values:
 
 |        	| IE 6 	| IE 7 	| IE 8 	| IE 9 	| IE 10 	| IE 11 	| MS Edge 	| Requires 64-bit Emulation |
@@ -49,16 +49,25 @@ This is the version of the OS that you want hosted and the version of IE you wan
 | Win10  	|      	|      	|      	|      	|       	|       	| X       	| X                         |
 
 
-## Supported VM Hosts
+#### Supported VM Hosts
 
 - [VirtualBox][4] _[default]_
  - If not installed, [chocolatey][1] will be used to install [VirtualBox][2], and the [Guest Additions][3].
-- [Vagrant][6] _[future support]_
+- [Vagrant][6] _[possible future support]_
  - If not installed, [chocolatey][1] will be used to install [Vagrant][5].
-- [VMWare][7] _[future support]_
+- [VMWare][7] _[possible future support]_
  - If not installed, [chocolatey][1] will be used to install [VMWare Player][8].
-- HyperV _[future support]_
-- VirtualPC _[future support]_
+- HyperV _[possible future support]_
+- VirtualPC _[possible future support]_
+
+
+#### [Microsoft Internet Explorer Announcement][12]
+
+>  **End of support is coming for older versions of Internet Explorer.**
+> 
+> Beginning January 12, 2016, only the current version of Internet Explorer available for a supported operating system will receive technical support and security updates. Microsoft recommends that customers running older versions of Internet Explorer upgrade to the most recent version, which is Internet Explorer 11 on Windows 7, Windows 8.1, and Windows 10.
+>
+> For a complete list of browser/OS combinations supported after January 12, 2016, please see the [Microsoft Support Lifecycle FAQ for Internet Explorer][13].
 
 [1]: https://chocolatey.org
 [2]: https://chocolatey.org/packages/virtualbox
@@ -71,3 +80,5 @@ This is the version of the OS that you want hosted and the version of IE you wan
 [9]: https://www.powershellgallery.com/
 [10]: http://go.microsoft.com/fwlink/?LinkID=624830&clcid=0x409
 [11]: http://go.microsoft.com/fwlink/?LinkId=398175
+[12]: https://technet.microsoft.com/en-us/ie/mt163707?utm_content=buffer3b3ad&utm_medium=social&utm_source=twitter.com&utm_campaign=buffer
+[13]: https://support.microsoft.com/en-us/lifecycle#gp/Microsoft-Internet-Explorer
