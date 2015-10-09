@@ -21,7 +21,6 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
-psievm/tools/
 
 # Visual Studio 2015 cache/options directory
 .vs/
