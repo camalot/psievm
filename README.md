@@ -1,6 +1,7 @@
-# psievm [![Build status](https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true)](https://ci.appveyor.com/project/camalot/psievm)
+# psievm [![Build status][15]][16]
 
-*psievm* is a powershell module for standing up an IE VM quickly and without hassle. This will do all the steps needed to get the VM running. 
+<img src="https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png" alt="psievm" style="float: left; margin-right: 10px; " /> *psievm* is a powershell module for standing up an IE VM quickly and without hassle. This will do all the steps needed to get the VM running. 
+<div>&nbsp;</div>
 
 - Install the VM Host (if needed, and supported)
 - Download the VM image
@@ -19,9 +20,7 @@ From command console:
 
     C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1'))"
 
-Chocolatey:
 
-    > choco install psievm
 
 
 #### Usage
@@ -87,3 +86,6 @@ This is the version of the OS that you want hosted and the version of IE you wan
 [11]: http://go.microsoft.com/fwlink/?LinkId=398175
 [12]: https://technet.microsoft.com/en-us/ie/mt163707?utm_content=buffer3b3ad&utm_medium=social&utm_source=twitter.com&utm_campaign=buffer
 [13]: https://support.microsoft.com/en-us/lifecycle#gp/Microsoft-Internet-Explorer
+[14]: https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png
+[15]: https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true
+[16]: https://ci.appveyor.com/project/camalot/psievm
