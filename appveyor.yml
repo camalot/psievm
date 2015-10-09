@@ -43,5 +43,14 @@ deploy:
   on:
     branch: master
     CI_DEPLOY_GITHUB: True
+- provider: NuGet
+  server: https://chocolatey.org/
+  api_key:
+    secure: ct0QuILR4Ewr9Ri7jzYoLXBSAG5Bk2MEIqYP8bO44bEDo5wmQPl0a+qxRKnLFz/U
+  skip_symbols: true
+  artifact: Nupkg
+  on:
+    branch: master
+    CI_DEPLOY_NUGET: True
 after_deploy:
 - ps: .\psievm\.appveyor\appveyor.after-deployment.ps1

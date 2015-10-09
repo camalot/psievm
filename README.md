@@ -1,7 +1,6 @@
-# psievm [![Build status][15]][16]
+# ![PSIEVM][14] psievm [![Build status][15]][16]
 
-<img src="https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png" alt="psievm" style="float: left; margin-right: 10px; " /> *psievm* is a powershell module for standing up an IE VM quickly and without hassle. This will do all the steps needed to get the VM running. 
-<div>&nbsp;</div>
+ *psievm* is a powershell module for standing up an IE VM quickly and without hassle. This will do all the steps needed to get the VM running. 
 
 - Install the VM Host (if needed, and supported)
 - Download the VM image
@@ -20,7 +19,9 @@ From command console:
 
     C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1'))"
 
+Chocolatey:
 
+    > choco install psievm
 
 
 #### Usage
