@@ -42,15 +42,18 @@
 		<Code Include="$(CI_PROJECT_PATH)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).ps*1" />
 	</ItemGroup>
 
-	<Target Name="Build" DependsOnTargets="SetBuildNumber;CopyModuleFilesToOutput;AssemblyInfo;ZipRelease">
+	<Target Name="Build" DependsOnTargets="SetBuildNumber;CopyModuleFilesToOutput;AssemblyInfo;ZipRelease;ChocolateyPack">
 		
+	</Target>
+
+	<Target Name="OutputPrep">
+		<CreateProperty Value="$(CI_ARTIFACT_PATH)\$(CI_BUILD_VERSION)\">
+			<Output PropertyName="OutputPath" TaskParameter="Value" />
+		</CreateProperty>
 	</Target>
 
 
 	<Target Name="CopyModuleFilesToOutput" DependsOnTargets="CleanBuild">
-		<CreateProperty Value="$(CI_ARTIFACT_PATH)\$(CI_BUILD_VERSION)\">
-			<Output PropertyName="OutputPath" TaskParameter="Value" />
-		</CreateProperty>
 		<Copy SourceFiles="@(Code)" DestinationFolder="$(OutputPath)\$(CI_PROJECT_NAME)\" />
 	</Target>
 
@@ -62,9 +65,11 @@
 			ReplacementText="ModuleVersion = '$(CI_BUILD_VERSION)'" />
 	</Target>
 
-	<Target Name="CleanBuild">
+	<Target Name="CleanBuild" DependsOnTargets="OutputPrep">
 		<RemoveDir Directories="$(OutputPath)" Condition="Exists('$(OutputPath)')" ContinueOnError="true" />
+		<Message Importance="high" Text="Creating '$(OutputPath)'" />
 		<MakeDir Directories="$(OutputPath)" Condition="!Exists('$(OutputPath)')" />
+		<Message Importance="high" Text="Creating '$(OutputPath)\$(CI_PROJECT_NAME)\'" />
 		<MakeDir Directories="$(OutputPath)\$(CI_PROJECT_NAME)\" Condition="!Exists('$(OutputPath)\$(CI_PROJECT_NAME)\')" />
 	</Target>
 
@@ -81,6 +86,38 @@ $(CI_PROJECT_URL)" Files="@(ZipFiles);"
 				 ZipFileName="$(OutputPath)$(CI_PROJECT_NAME).$(CI_BUILD_VERSION).zip" ZipLevel="9" Flatten="False" />
 
 		<!--<Delete Files="@(ZipFiles)" />-->
+	</Target>
+
+	<Target Name="ChocolateyPack">
+		<CreateProperty Value="$(CI_PROJECT_PATH)$(CI_PROJECT_NAME).package\bin\$(CI_BUILD_VERSION)\">
+			<Output PropertyName="PackOutputPath" TaskParameter="Value"/>
+		</CreateProperty>
+		<CreateProperty Value="$(CI_PROJECT_PATH)psievm.package\">
+			<Output PropertyName="PackProjectPath" TaskParameter="Value"/>
+		</CreateProperty>
+		<MakeDir Directories="$(PackOutputPath)" Condition=" !Exists('$(PackOutputPath)') " />
+		<CreateItem Include="$(PackProjectPath)\**\*.ps1;$(PackProjectPath)\$(CI_PROJECT_NAME).nuspec">
+			<Output ItemName="PackFiles" TaskParameter="Include" />
+		</CreateItem>
+
+		<Copy SourceFiles="@(PackFiles)" DestinationFolder="$(PackOutputPath)\%(RecursiveDir)\" />
+
+		<Exec WorkingDirectory="$(PackOutputPath)" ContinueOnError="True" Command="choco pack &quot;$(PackOutputPath)\$(CI_PROJECT_NAME).nuspec&quot; --version $(CI_BUILD_VERSION)" IgnoreExitCode="true">
+			<Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+		</Exec>
+
+		<CreateItem Include="$(PackOutputPath)\**\*" Exclude="$(PackOutputPath)\**\*.nupkg">
+			<Output ItemName="Leftovers" TaskParameter="Include"/>
+		</CreateItem>
+
+		<Delete Files="@(Leftovers)" ContinueOnError="true" />
+		<RemoveDir Directories="$(PackOutputPath)\tools\" ContinueOnError="true" />
+		
+		<Message Text=" " Importance="High" />
+		<Message Text="Build Exit Code: $(ExitCode)" Importance="High" />
+		<Error Text="Encountered error(s) when creating package.%0aCheck the NuGet.log file for details." Condition=" '$(ExitCode)' != '0' " File="NuGet.log" />
+		<Message Text="SUCCESS: Created package." Condition=" '$(Configuration)|$(Platform)|$(ExitCode)' == 'Debug|AnyCPU|0' " Importance="High" />
+
 	</Target>
 
 

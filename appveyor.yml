@@ -27,6 +27,8 @@ artifacts:
   name: PSModule
 - path: '**\bin\**\psievm.*.zip'
   name: Zip
+- path: '**\bin\**\psievm.*.nupkg'
+  name: Nupkg
 before_deploy:
 - ps: .\psievm\.appveyor\appveyor.before-deployment.ps1
 deploy:

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>psievm</id>
+    <version>1.0.0</version>
+    <title>PSIEVM</title>
+    <authors>Ryan Conrad</authors>
+    <owners>Ryan Conrad</owners>
+    <description>
+			psievm is a powershell module for standing up an IE Virtual Machine in VirtualBox quickly and without hassle. This will do all the steps needed to get the VM running.
+		</description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+			Get an IE Virtual Machine running in VirtualBox
+		</summary>
+    <language>en-US</language>
+    <projectUrl>https://github.com/camalot/psievm</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <copyright>Copyright (c) Ryan Conrad 2015</copyright>
+    <dependencies>
+    </dependencies>
+    <references></references>
+    <tags>powershell virtualmachine virtualbox internetexplorer ie vm machine testing</tags>
+  </metadata>
+</package>

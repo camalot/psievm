@@ -84,17 +84,15 @@ function Get-IEVM {
 
 	.EXAMPLE
 
-	Get the IE6 on Windows XP VM for VirtualBox
-
 	Get-IEVM -OS XP -IEVersion 6 -VMHost VirtualBox
 
+	Get the IE6 on Windows XP VM for VirtualBox
 
 	.EXAMPLE
 
-	Get the IE9 on Windows 7 VM for VirtualBox from your company network share
-
 	Get-IEVM -OS Win7 -IEVersion 9 -VMHost VirtualBox -AlternateVMLocation "\\vmhost-machine\VirtualBox\"
 
+	Get the IE9 on Windows 7 VM for VirtualBox from your company network share
 
 	.NOTES
 
