@@ -4,8 +4,13 @@ $params = ConvertFrom-StringData ($env:chocolateyPackageParameters -replace ';',
 $ModulesRoot = $params.PSModuleDirectory;
 
 if(-not $ModulesRoot) {
-	$userDocsPath = [Environment]::GetFolderPath("MyDocuments");
-	$ModulesRoot = (Join-Path $userDocsPath "\WindowsPowerShell\Modules\");
+	$docsPath = [Environment]::GetFolderPath("MyDocuments");
+	if(-not $docsPath) {
+		# if MyDocuments doesn't give anything, use the user profile
+		$ModulesRoot = (Join-Path -Path $env:USERPROFILE -ChildPath "Documents\WindowsPowerShell\Modules\");
+	} else {
+		$ModulesRoot = (Join-Path -Path $docsPath -ChildPath "WindowsPowerShell\Modules\");
+	}
 }
 
 $PSIEVMModuleRootPath = (Join-Path $ModulesRoot "psievm");
@@ -20,6 +25,7 @@ if($env:chocolateyPackageFolder) {
 
 if(Test-Path($PSIEVMModuleRootPath)) {
 	"Delete $PSIEVMModuleRootPath" | Write-Host;
+	# cmd is used because Remove-Item wont delete a junction
 	cmd /c rmdir "$PSIEVMModuleRootPath";
 }
 

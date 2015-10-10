@@ -119,14 +119,16 @@ if(-not $ModulesRoot) {
 if($env:chocolateyPackageFolder) {
 	$ModuleTarget = (Join-Path $env:chocolateyPackageFolder "Modules");
 	$PSIEVMModuleTarget = (Join-Path $ModuleTarget "psievm");
-	$PSIEVModuleRootPath = (Join-Path $ModulesRoot "psievm");
+	$PSIEVMModuleRootPath = (Join-Path $ModulesRoot "psievm");
 
 	Install-PSIEVM -ModulesPath $ModuleTarget;
 
-
-	if (Test-Path "$PSIEVModuleRootPath") {
-		Remove-Item -Path "$PSIEVModuleRootPath" -Force -Recurse | Out-Null;
+	if(Test-Path($PSIEVMModuleRootPath)) {
+		"Delete $PSIEVMModuleRootPath" | Write-Host;
+		# cmd is used because Remove-Item wont delete a junction
+		cmd /c rmdir "$PSIEVMModuleRootPath";
 	}
+
 	"Creating junction: $PSIEVModuleRootPath -> $PSIEVMModuleTarget" | Write-Host;
 	cmd /c mklink /j "$PSIEVModuleRootPath" "$PSIEVMModuleTarget";
 } else {

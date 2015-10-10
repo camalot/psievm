@@ -16,6 +16,9 @@ if($env:PUSHBULLET_API_TOKEN -and $env:CI_DEPLOY_PUSHBULLET -eq $true) {
 }
 
 
+# NOT WORKING! It is closer than I was before, but still broken.
+# PackageManagement\Get-PackageSource : Unable to find module providers (PSModule).
+# I think I am missing something that is required to be loaded.
 if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -and $env:PSGetZipUrl ) {
 	try {
 		$url = $env:PSGetZipUrl;
