@@ -29,19 +29,20 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 
 		Expand-ZipArchive -File $tempZip -Destination $dest;
 
-		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PackageManagement\1.0.0.0\PackageManagement.psd1" -Verbose -Force;
+		# we need to import the psievm module before it can be published.
+
+		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)\psievm\psievm.psd1" -Verbose -Force;
+
+		Import-Module  "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PackageManagement\1.0.0.0\PackageManagement.psd1" -Verbose -Force;
 		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PowerShellGet\PowerShellGet.psd1" -Verbose -Force;
 
 		Get-PackageProvider -Name NuGet -ForceBootstrap;
 
-		Get-Help Publish-Module;
-
-		(Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path)
 
 		if( (Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path) ) {
 			"Found the loaded PowerShellGet Module" | Write-Host;
-			$artifact = "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)\";
-			Publish-Module -Name "psievm" -Path $artifact -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN -RequiredVersion "3.0";
+			$artifact = "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)\psievm";
+			Publish-Module -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN -Path $artifact;
 
 		}
 	} catch [Exception] {
