@@ -29,20 +29,17 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 
 		Expand-ZipArchive -File $tempZip -Destination $dest;
 
+		# create junction
+		$jsource = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\ProviderAssemblies\";
 		$NuGetBinaryLocalAppDataPath = "$env:LOCALAPPDATA\PackageManagement\ProviderAssemblies\";
 		if(!(Test-Path -Path $NuGetBinaryLocalAppDataPath)) {
-			New-Item -Path $NuGetBinaryLocalAppDataPath -Force -ItemType Directory | Out-Null;
+			cmd /c mklink /j "$jsource" "$NuGetBinaryLocalAppDataPath";
 		}
 
 		$NuGetBinaryProgramDataPath = "$env:PROGRAMFILES\PackageManagement\ProviderAssemblies\";
 		if(!(Test-Path -Path $NuGetBinaryProgramDataPath)) {
-			New-Item -Path $NuGetBinaryProgramDataPath -Force -ItemType Directory | Out-Null;
+			cmd /c mklink /j "$jsource" "$NuGetBinaryProgramDataPath";
 		}
-
-		# create junction
-		$jsource = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\ProviderAssemblies\";
-		cmd /c mklink /j "$jsource" "$NuGetBinaryLocalAppDataPath";
-		cmd /c mklink /j "$jsource" "$NuGetBinaryProgramDataPath";
 
 		# we need to import the psievm module before it can be published.
 
