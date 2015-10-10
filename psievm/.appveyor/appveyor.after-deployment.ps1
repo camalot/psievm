@@ -29,15 +29,27 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 
 		Expand-ZipArchive -File $tempZip -Destination $dest;
 
+		$NuGetBinaryLocalAppDataPath = "$env:LOCALAPPDATA\PackageManagement\ProviderAssemblies\";
+		if(!(Test-Path -Path $NuGetBinaryLocalAppDataPath)) {
+			New-Item -Path $NuGetBinaryLocalAppDataPath -Force -ItemType Directory | Out-Null;
+		}
+
+		$NuGetBinaryProgramDataPath = "$env:PROGRAMFILES\PackageManagement\ProviderAssemblies\";
+		if(!(Test-Path -Path $NuGetBinaryProgramDataPath)) {
+			New-Item -Path $NuGetBinaryProgramDataPath -Force -ItemType Directory | Out-Null;
+		}
+
+		# create junction
+		$jsource = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\ProviderAssemblies\";
+		cmd /c mklink /j "$jsource" "$NuGetBinaryLocalAppDataPath";
+		cmd /c mklink /j "$jsource" "$NuGetBinaryProgramDataPath";
+
 		# we need to import the psievm module before it can be published.
 
 		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)\psievm\psievm.psd1" -Verbose -Force;
 
 		Import-Module  "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PackageManagement\1.0.0.0\PackageManagement.psd1" -Verbose -Force;
 		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PowerShellGet\PowerShellGet.psd1" -Verbose -Force;
-
-		Get-PackageProvider -Name NuGet -ForceBootstrap;
-
 
 		if( (Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path) ) {
 			"Found the loaded PowerShellGet Module" | Write-Host;
