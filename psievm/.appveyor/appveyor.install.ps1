@@ -24,7 +24,3 @@ if ( (Get-Module -Name "PowerShellGet") -eq $null ) {
 
 Get-PackageProvider -Name NuGet -ForceBootstrap;#>
 # Install-Module -Name PSScriptAnalyzer -Force;
-
-Get-PackageProvider -Name NuGet -ForceBootstrap;
-
-Get-Help Publish-Module

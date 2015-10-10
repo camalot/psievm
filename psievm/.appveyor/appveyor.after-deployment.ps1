@@ -32,11 +32,15 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PackageManagement\1.0.0.0\PackageManagement.psd1" -Verbose -Force;
 		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PowerShellGet\PowerShellGet.psd1" -Verbose -Force;
 
+		Get-PackageProvider -Name NuGet -ForceBootstrap;
+
 		Get-Help Publish-Module;
+
+		(Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path)
 
 		if( (Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path) ) {
 			"Found the loaded PowerShellGet Module" | Write-Host;
-			$artifact = "$env:APPVEYOR_BUILD_FOLDER\bin\$($env:CI_BUILD_VERSION)\";
+			$artifact = "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)\";
 			Publish-Module -Name "psievm" -Path $artifact -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN -RequiredVersion "3.0";
 
 		}
