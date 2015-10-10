@@ -37,7 +37,7 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 		if( (Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path) ) {
 			"Found the loaded PowerShellGet Module" | Write-Host;
 			$artifact = "$env:APPVEYOR_BUILD_FOLDER\bin\$($env:CI_BUILD_VERSION)\";
-			Publish-Module -Name "psievm" -Path $artifact -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN;
+			Publish-Module -Name "psievm" -Path $artifact -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN -RequiredVersion "3.0";
 
 		}
 	} catch [Exception] {
