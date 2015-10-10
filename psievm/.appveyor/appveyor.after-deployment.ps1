@@ -38,7 +38,7 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 
 		$NuGetBinaryLocalAppDataPath = "$env:LOCALAPPDATA\PackageManagement\ProviderAssemblies\";
 		if(!(Test-Path -Path $NuGetBinaryLocalAppDataPath)) {
-			cmd /c mklink /j "$jsource" "$NuGetBinaryLocalAppDataPath";
+			cmd /c mklink /j "$NuGetBinaryLocalAppDataPath" "$jsource";
 		}
 
 		if(!(Test-Path -Path "$env:PROGRAMFILES\PackageManagement")) {
@@ -47,7 +47,7 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 
 		$NuGetBinaryProgramDataPath = "$env:PROGRAMFILES\PackageManagement\ProviderAssemblies\";
 		if(!(Test-Path -Path $NuGetBinaryProgramDataPath)) {
-			cmd /c mklink /j "$jsource" "$NuGetBinaryProgramDataPath";
+			cmd /c mklink /j "$NuGetBinaryProgramDataPath" "$jsource";
 		}
 
 		# we need to import the psievm module before it can be published.
