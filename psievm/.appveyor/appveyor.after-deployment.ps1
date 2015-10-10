@@ -21,7 +21,7 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 		$dest = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\";
 		$temp = "$env:APPVEYOR_BUILD_FOLDER\Temp";
 		if(!(Test-Path -Path $temp)) {
-			New-Item -Path $temp -Force | Out-Null;
+			New-Item -Path $temp -Force -ItemType Directory | Out-Null;
 		}
 		$tempZip = Join-Path -Path $temp -ChildPath "PowerShellGet.zip";
 		Invoke-DownloadFile -Url $url -File $tempZip;
