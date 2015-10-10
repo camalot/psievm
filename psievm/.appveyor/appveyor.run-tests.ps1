@@ -14,11 +14,13 @@ if(!(Test-Path -Path $pesterBin)) {
 
 
 $currentDirectory = $PWD;
-
-Set-Location -Path (Join-Path -Path "$env:APPVEYOR_BUILD_FOLDER" -ChildPath "psievm\psievm.tests\") | Out-Null;
+$workingDir = (Join-Path -Path "$env:APPVEYOR_BUILD_FOLDER" -ChildPath "psievm\psievm.tests\");
+"Moving to '$workingDir'" | Write-Host;
+Set-Location -Path $workingDir | Out-Null;
 
 Copy-Item -Path "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm\psievm.ps*1" -Destination "$PWD" -Force | Write-Host;
 
-(& `"$pesterBin`" *>&1);
+(& cmd /c `"$pesterBin`" *>&1);
 
+"Moving back to '$currentDirectory'" | Write-Host;
 Set-Location $currentDirectory | Out-Null;
