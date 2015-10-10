@@ -22,8 +22,8 @@ Set-Location -Path $workingDir | Out-Null;
 Copy-Item -Path "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm\psievm.ps*1" -Destination "$PWD" -Force | Write-Host;
 
 #(& cmd /c `"$pesterBin`" *>&1);
-$tests = (Get-ChildItem -Path "$workingDir\*.Tests.ps1" | select -ExpandProperty name) -join $workingDir;
-Invoke-Pester -Script $tests -CodeCoverage $tests;
+$tests = (Get-ChildItem -Path "$workingDir\*.Tests.ps1" | % { $_.FullName });
+Invoke-Pester -Script $tests;
 
 "Moving back to '$currentDirectory'" | Write-Host;
 Set-Location $currentDirectory | Out-Null;
