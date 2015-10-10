@@ -11,6 +11,7 @@ if(!(Test-Path -Path $pesterBin)) {
 		throw "Pester not installed."
 	}
 }
+Import-Module "pester" -Verbose -Force;
 
 
 $currentDirectory = $PWD;
@@ -20,7 +21,9 @@ Set-Location -Path $workingDir | Out-Null;
 
 Copy-Item -Path "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm\psievm.ps*1" -Destination "$PWD" -Force | Write-Host;
 
-(& cmd /c `"$pesterBin`" *>&1);
+#(& cmd /c `"$pesterBin`" *>&1);
+$tests = Get-ChildItem -Path "$workingDir\**\*.Tests.ps1";
+Invoke-Pester -Script $tests -CodeCoverage $tests;
 
 "Moving back to '$currentDirectory'" | Write-Host;
 Set-Location $currentDirectory | Out-Null;
