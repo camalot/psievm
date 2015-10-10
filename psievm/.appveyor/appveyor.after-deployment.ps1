@@ -1,4 +1,4 @@
-Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\AppVeyor-Helper.psm1";
+Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\AppVeyor-Helper.psm1" -Verbose -Force;
 
 
 if($env:PUSHBULLET_API_TOKEN -and $env:CI_DEPLOY_PUSHBULLET -eq $true) {
@@ -17,6 +17,7 @@ if($env:PUSHBULLET_API_TOKEN -and $env:CI_DEPLOY_PUSHBULLET -eq $true) {
 
 
 if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -and $env:PSGetZipUrl ) {
+	try {
 		$url = $env:PSGetZipUrl;
 		$dest = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\";
 		$temp = "$env:APPVEYOR_BUILD_FOLDER\Temp";
@@ -28,13 +29,16 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 
 		Expand-ZipArchive -File $tempZip -Destination $dest;
 
-		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PackageManagement\1.0.0.0\PackageManagement.psd1";
-		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PowerShellGet\PowerShellGet.psd1";
+		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PackageManagement\1.0.0.0\PackageManagement.psd1" -Verbose -Force;
+		Import-Module "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\PowerShellGet\PowerShellGet.psd1" -Verbose -Force;
 
-		if(Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey ) {
+		if( (Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path).Source -eq "PowerShellGet" ) {
 			"Found the loaded PowerShellGet Module" | Write-Host;
 			$artifact = "$env:APPVEYOR_BUILD_FOLDER\bin\$($env:CI_BUILD_VERSION)\";
 			Publish-Module -Name "psievm" -Path $artifact -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN;
 
 		}
+	} catch [Exception] {
+		throw;
+	}
 }
