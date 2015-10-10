@@ -5,7 +5,8 @@ skip_tags: true
 os: Windows Server 2012 R2
 init:
 - ps: >-
-    Write-Host "Initializing Build Host";
+    Write-Host "Initializing Build Host"
+
 
     # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 environment:
@@ -24,6 +25,8 @@ build:
   verbosity: normal
 after_build:
 - ps: .\psievm\.appveyor\appveyor.after-build.ps1
+test_script:
+- ps: .\psievm\.appveyor\appveyor.run-tests.ps1
 artifacts:
 - path: '**\bin\**\psievm.ps*1'
   name: PSModule
