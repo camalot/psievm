@@ -27,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".appveyor", ".appveyor", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{D9D3FE65-1338-426E-9A13-9D71A8FDC567}"
 	ProjectSection(SolutionItems) = preProject
+		.appveyor\modules\Download-File.psm1 = .appveyor\modules\Download-File.psm1
 		.appveyor\modules\Send-PushBulletMessage.psm1 = .appveyor\modules\Send-PushBulletMessage.psm1
 		.appveyor\modules\Set-BuildVersion.psm1 = .appveyor\modules\Set-BuildVersion.psm1
 	EndProjectSection

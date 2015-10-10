@@ -18,7 +18,7 @@
     <projectUrl>https://github.com/camalot/psievm</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <licenseUrl>https://github.com/camalot/psievm/blob/master/LICENSE.md</licenseUrl>
     <copyright>Copyright (c) Ryan Conrad 2015</copyright>
     <dependencies>
     </dependencies>

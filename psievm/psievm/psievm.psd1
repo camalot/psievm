@@ -58,7 +58,7 @@ PowerShellVersion = '3.0'
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = 'Get-IEVM';
+FunctionsToExport = @('Get-IEVM');
 
 # Cmdlets to export from this module
 CmdletsToExport = '';
@@ -67,7 +67,7 @@ CmdletsToExport = '';
 VariablesToExport = ''
 
 # Aliases to export from this module
-AliasesToExport = 'psievm';
+AliasesToExport = @('psievm');
 
 # DSC resources to export from this module
 # DscResourcesToExport = @()
@@ -76,28 +76,23 @@ AliasesToExport = 'psievm';
 # ModuleList = @()
 
 # List of all files packaged with this module
-# FileList = @()
+FileList = @("psievm.ps1");
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
 
     PSData = @{
-
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
-
+        Tags = @("powershell", "virtualmachine", "virtualbox", "internetexplorer", "ie", "vm", "machine", "testing");
         # A URL to the license for this module.
         LicenseUri = 'https://github.com/camalot/psievm/blob/master/LICENSE.md'
-
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/camalot/psievm'
-
         # A URL to an icon representing this module.
-        # IconUri = ''
-
+        IconUri = 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png'
         # ReleaseNotes of this module
         # ReleaseNotes = ''
-
+				
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable

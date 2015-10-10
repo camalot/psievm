@@ -104,10 +104,16 @@ function Get-LatestGithubRelease {
 
 $params = ConvertFrom-StringData ($env:chocolateyPackageParameters -replace ';', "`n");
 $ModulesRoot = $params.PSModuleDirectory;
+$ProgramFilesModulesPath = (Join-Path -Path $env:ProgramFiles -ChildPath "WindowsPowerShell\Modules");
 
 if(-not $ModulesRoot) {
-	$userDocsPath = [Environment]::GetFolderPath("MyDocuments");
-	$ModulesRoot = (Join-Path $userDocsPath "\WindowsPowerShell\Modules\");
+	$docsPath = [Environment]::GetFolderPath("MyDocuments");
+	if(-not $docsPath) {
+		# if MyDocuments doesn't give anything, use the user profile
+		$ModulesRoot = (Join-Path -Path $env:USERPROFILE -ChildPath "Documents\WindowsPowerShell\Modules\");
+	} else {
+		$ModulesRoot = (Join-Path -Path $docsPath -ChildPath "WindowsPowerShell\Modules\");
+	}
 }
 
 if($env:chocolateyPackageFolder) {
