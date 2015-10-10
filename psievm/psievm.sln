@@ -21,17 +21,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".appveyor", ".appveyor", "{
 		.appveyor\appveyor.before-build.ps1 = .appveyor\appveyor.before-build.ps1
 		.appveyor\appveyor.before-deployment.ps1 = .appveyor\appveyor.before-deployment.ps1
 		.appveyor\appveyor.install.ps1 = .appveyor\appveyor.install.ps1
+		.appveyor\appveyor.run-tests.ps1 = .appveyor\appveyor.run-tests.ps1
 		..\appveyor.yml = ..\appveyor.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{D9D3FE65-1338-426E-9A13-9D71A8FDC567}"
 	ProjectSection(SolutionItems) = preProject
 		.appveyor\modules\AppVeyor-Helper.psm1 = .appveyor\modules\AppVeyor-Helper.psm1
+		.appveyor\modules\Invoke-MsBuild.psm1 = .appveyor\modules\Invoke-MsBuild.psm1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{5C23B540-8B59-4D34-93D7-6660583F1B16}"
 	ProjectSection(SolutionItems) = preProject
 		.build\BuildPSIEVM.msbuild = .build\BuildPSIEVM.msbuild
+		.build\CIProperties.msbuild = .build\CIProperties.msbuild
+		.build\TestPSIEVM.msbuild = .build\TestPSIEVM.msbuild
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".targets", ".targets", "{A36414B7-E6F1-4072-97C8-1A56B5DE31A9}"
@@ -52,6 +56,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".tools", ".tools", "{3A6AFF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "psievm.package", "psievm.package\psievm.package.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
 EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "psievm.tests", "psievm.tests\psievm.tests.pssproj", "{39943786-FDDB-4B37-ABE0-1D5E66560ACC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +72,10 @@ Global
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39943786-FDDB-4B37-ABE0-1D5E66560ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39943786-FDDB-4B37-ABE0-1D5E66560ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39943786-FDDB-4B37-ABE0-1D5E66560ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39943786-FDDB-4B37-ABE0-1D5E66560ACC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

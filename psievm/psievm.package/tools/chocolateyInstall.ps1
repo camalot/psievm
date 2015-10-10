@@ -129,8 +129,8 @@ if($env:chocolateyPackageFolder) {
 		cmd /c rmdir "$PSIEVMModuleRootPath";
 	}
 
-	"Creating junction: $PSIEVModuleRootPath -> $PSIEVMModuleTarget" | Write-Host;
-	cmd /c mklink /j "$PSIEVModuleRootPath" "$PSIEVMModuleTarget";
+	"Creating junction: $PSIEVMModuleRootPath -> $PSIEVMModuleTarget" | Write-Host;
+	cmd /c mklink /j "$PSIEVMModuleRootPath" "$PSIEVMModuleTarget";
 } else {
 	Install-PSIEVM -ModulesPath $ModulesRoot;
 }

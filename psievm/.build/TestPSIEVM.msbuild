@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0" DefaultTargets="RunPester">
+	<Import Project="$(MSBuildProjectDirectory)\..\.build\CIProperties.msbuild" Condition=" '$(CIProperties)' == '' "/>
+	<PropertyGroup>
+		<PesterPath Condition=" '$(PesterPath)' == '' ">$(CI_PROJECT_PATH)\psievm.tests\</PesterPath>
+		<ChocolateyInstall Condition=" '$(ChocolateyInstall)' == '' ">$(PROGRAMDATA)\chocolatey\</ChocolateyInstall>
+		<PesterBin Condition=" '$(PesterBin)' == '' ">$(ChocolateyInstall)\lib\pester\tools\bin\pester.bat</PesterBin>
+	</PropertyGroup>
+	<ItemGroup>
+		<PesterSourceFiles Include="$(CI_PROJECT_PATH)\psievm\psievm.psm1;$(CI_PROJECT_PATH)\psievm\psievm.psd1" />
+	</ItemGroup>
+
+	<Target Name="PesterPrep">
+		<Exec Command="choco install pester -y"  Condition=" !Exists('$(PesterBin)') "/>
+
+		<Copy SourceFiles="@(PesterSourceFiles)" DestinationFolder="$(PesterPath)" OverwriteReadOnlyFiles="true" />
+
+	</Target>
+	
+	<Target Name="RunPester" DependsOnTargets="PesterPrep" AfterTargets="PesterCleanup">
+		<Error Text="CIProperties not loaded" Code="404" Condition=" '$(CIProperties)' == '' " />
+		<Error Text="Unknown CI_PROJECT_PATH" Code="404" Condition=" '$(CI_PROJECT_PATH)' == '' " />
+		
+		<Exec Command="cmd /c &quot;$(PesterBin)&quot;" WorkingDirectory="$(PesterPath)" />
+
+	</Target>
+
+	<Target Name="PesterCleanup" Condition=" '$(CI)' == 'True' ">
+		<CreateItem Include="$(PesterPath)\psievm.psm1;$(PesterPath)\psievm.psd1;">
+			<Output ItemName="PesterDestFiles" TaskParameter="Include"/>
+		</CreateItem>
+
+		<Delete Files="@(PesterDestFiles)" />
+	</Target>
+</Project>

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0" DefaultTargets="Build">
+
+	<PropertyGroup>
+		<CIProperties>CIProperties</CIProperties>
+		<CI Condition=" '$(CI)' == '' ">False</CI>
+		<CI_BUILD_MAJOR Condition=" '$(CI_BUILD_MAJOR)' == '' ">0</CI_BUILD_MAJOR>
+		<CI_BUILD_MINOR Condition=" '$(CI_BUILD_MINOR)' == '' ">1</CI_BUILD_MINOR>
+		<CI_BUILD_NUMBER Condition="'$(CI_BUILD_NUMBER)' == '' AND '$(APPVEYOR)' == 'True' AND '$(APPVEYOR_BUILD_NUMBER)' != '' ">$(APPVEYOR_BUILD_NUMBER)</CI_BUILD_NUMBER>
+		<CI_BUILD_NUMBER Condition="'$(CI_BUILD_NUMBER)' == ''">0</CI_BUILD_NUMBER>
+		<CI_BUILD_REVISION Condition=" '$(CI_BUILD_REVISION)' == '' AND '$(APPVEYOR)' != 'True' ">0</CI_BUILD_REVISION>
+		<CI_BUILD_REVISION Condition =" '$(CI_BUILD_REVISION)' == ''">0</CI_BUILD_REVISION>
+
+		<CI_PROJECT_NAME Condition="'$(APPVEYOR)' == 'True' ">$(APPVEYOR_PROJECT_NAME)</CI_PROJECT_NAME>
+		<CI_PROJECT_NAME Condition=" '$(CI_PROJECT_NAME)' == '' ">psievm</CI_PROJECT_NAME>
+		<CI_PROJECT_FRIENDLY_NAME Condition=" '$(CI_PROJECT_FRIENDLY_NAME)' == '' ">psievm</CI_PROJECT_FRIENDLY_NAME>
+		<CI_ARTIFACT_PATH Condition=" '$(CI_ARTIFACT_PATH)' == '' ">$(MSBuildProjectDirectory)\..\bin\</CI_ARTIFACT_PATH>
+		<CI_PROJECT_PATH Condition=" '$(CI_PROJECT_PATH)' == '' ">$(MSBuildProjectDirectory)\..\</CI_PROJECT_PATH>
+
+		<CI_BUILD_DATE Condition=" '$(CI_BUILD_DATE)' == '' ">$([System.DateTime]::UtcNow.ToString("MM-dd-yyyy"))</CI_BUILD_DATE>
+		<CI_BUILD_TIME Condition=" '$(CI_BUILD_TIME)' == '' ">$([System.DateTime]::UtcNow.ToString("hh:mm:ss"))</CI_BUILD_TIME>
+
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'False' ">Local</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_SCHEDULED_BUILD)' == 'True' ">Scheduled</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_FORCED_BUILD)' == 'True' ">Forced</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_RE_BUILD)' == 'True' ">Rebuild</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_REPO_TAG)' == 'True' ">Tag</CI_BUILD_CONDITION>
+		<CI_BUILD_CONDITION Condition=" '$(CI)' == 'True' AND '$(APPVEYOR_PULL_REQUEST_NUMBER)' == 'True' ">PullRequest</CI_BUILD_CONDITION>
+
+		<CI_PROJECT_URL>https://github.com/camalot/psievm/</CI_PROJECT_URL>
+
+		<Major>$(CI_BUILD_MAJOR)</Major>
+		<Minor>$(CI_BUILD_MINOR)</Minor>
+		<Build>$(CI_BUILD_NUMBER)</Build>
+		<Revision>$(CI_BUILD_REVISION)</Revision>
+
+		<CI_BUILD_VERSION Condition=" '$(CI_BUILD_VERSION)' == '' ">$(Major).$(Minor).$(Build).$(Revision)</CI_BUILD_VERSION>
+	</PropertyGroup>
+
+
+
+</Project>
