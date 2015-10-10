@@ -30,10 +30,19 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true -an
 		Expand-ZipArchive -File $tempZip -Destination $dest;
 
 		# create junction
-		$jsource = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\ProviderAssemblies\";
+		$jsource = "$env:APPVEYOR_BUILD_FOLDER\psievm\.appveyor\modules\ProviderAssemblies";
+
+		if(!(Test-Path -Path "$env:LOCALAPPDATA\PackageManagement")) {
+			New-Item -Path "$env:LOCALAPPDATA\PackageManagement" -ItemType Directory;
+		}
+
 		$NuGetBinaryLocalAppDataPath = "$env:LOCALAPPDATA\PackageManagement\ProviderAssemblies\";
 		if(!(Test-Path -Path $NuGetBinaryLocalAppDataPath)) {
 			cmd /c mklink /j "$jsource" "$NuGetBinaryLocalAppDataPath";
+		}
+
+		if(!(Test-Path -Path "$env:PROGRAMFILES\PackageManagement")) {
+			New-Item -Path "$env:PROGRAMFILES\PackageManagement" -ItemType Directory;
 		}
 
 		$NuGetBinaryProgramDataPath = "$env:PROGRAMFILES\PackageManagement\ProviderAssemblies\";

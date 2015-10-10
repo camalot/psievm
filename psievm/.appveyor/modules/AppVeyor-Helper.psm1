@@ -24,7 +24,7 @@ function Expand-ZipArchive {
 	}
 
 	# unzip the package
-	"Extracting $file to $ModulesPath" | Write-Host;
+	"Extracting $file to $Destination" | Write-Host;
 	Start-Process "$7zaExe" -ArgumentList "x -o`"$Destination`" -y `"$File`"" -Wait -NoNewWindow;
 }
 
