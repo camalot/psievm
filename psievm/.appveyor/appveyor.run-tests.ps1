@@ -1,7 +1,7 @@
 
 $pesterBin = (Join-Path -Path $env:ChoclateyInstall -ChildPath "\lib\pester\tools\bin\pester.bat");
 
-if(!(Test-Path -Path $$pesterBin)) {
+if(!(Test-Path -Path $pesterBin)) {
 	choco install pester -y -force | Write-Host;
 }
 
