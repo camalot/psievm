@@ -6,7 +6,6 @@ function Download-File {
 	process {
 		"Downloading $url to $file" | Write-Host;
 		$downloader = new-object System.Net.WebClient;
-		$downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
 		$downloader.DownloadFile($url, $file);
 	}
 }
