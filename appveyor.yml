@@ -33,6 +33,8 @@ artifacts:
   name: Zip
 - path: '**\bin\**\psievm.*.nupkg'
   name: Nupkg
+- path: '**\nunit-results.xml'
+  name: NUnit
 before_deploy:
 - ps: .\psievm\.appveyor\appveyor.before-deployment.ps1
 deploy:

@@ -12,6 +12,10 @@ $psChocoFiles = "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm.package\tools\*.ps1";
 Copy-Item -Path "$psModuleFiles" -Destination "$workingDir" -Force -Verbose;
 Copy-Item -Path "$psChocoFiles" -Destination "$workingDir" -Force -Verbose;
 $tests = (Get-ChildItem -Path "$workingDir\*.Tests.ps1" | % { $_.FullName });
-Invoke-Pester -Script $tests;
+$resultsOutput = (Join-Path -Path $workingDir -ChildPath "results\nunit-results.xml");
+Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput;
+
+$wc = New-Object "System.Net.WebClient";
+$wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $resultsOutput);
 
 Set-Location -Path $cdir | Out-Null;
