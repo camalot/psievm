@@ -3,7 +3,7 @@
 $name   = 'psievm'
 
 
-function Download-File {
+function Invoke-DownloadFile {
 	Param (
 		[string]$url,
 		[string]$file
@@ -44,12 +44,12 @@ function Install-PSIEVM {
 	}
 	process {
 		# download the package
-		Download-File -url $url -file $file;
+		Invoke-DownloadFile -url $url -file $file;
 
 		# download 7zip
 		"Download 7Zip commandline tool" | Write-Host;
 		$7zaExe = (Join-Path $tempDir '7za.exe');
-		Download-File -url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -file "$7zaExe";
+		Invoke-DownloadFile -url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -file "$7zaExe";
 
 		# unzip the package
 		"Extracting $file to $ModulesPath" | Write-Host;
@@ -102,36 +102,64 @@ function Get-LatestGithubRelease {
 	}
 }
 
-$params = ConvertFrom-StringData ($env:chocolateyPackageParameters -replace ';', "`n");
-$ModulesRoot = $params.PSModuleDirectory;
-$ProgramFilesModulesPath = (Join-Path -Path $env:ProgramFiles -ChildPath "WindowsPowerShell\Modules");
-
-if(-not $ModulesRoot) {
-	$docsPath = [Environment]::GetFolderPath("MyDocuments");
+function Get-DocumentsModulePath {
+	$docsPath = (Get-EnvironmentFolderPath -Name MyDocuments);
 	if(-not $docsPath) {
 		# if MyDocuments doesn't give anything, use the user profile
-		$ModulesRoot = (Join-Path -Path $env:USERPROFILE -ChildPath "Documents\WindowsPowerShell\Modules\");
+		return (Join-Path -Path $env:USERPROFILE -ChildPath "Documents\WindowsPowerShell\Modules\");
 	} else {
-		$ModulesRoot = (Join-Path -Path $docsPath -ChildPath "WindowsPowerShell\Modules\");
+		return (Join-Path -Path $docsPath -ChildPath "WindowsPowerShell\Modules\");
 	}
 }
 
-if($env:chocolateyPackageFolder) {
-	$ModuleTarget = (Join-Path $env:chocolateyPackageFolder "Modules");
-	$PSIEVMModuleTarget = (Join-Path $ModuleTarget "psievm");
-	$PSIEVMModuleRootPath = (Join-Path $ModulesRoot "psievm");
+function Get-EnvironmentFolderPath {
+	Param (
+		[Parameter(Mandatory=$true)]
+		[string] $Name
+	);
 
-	Install-PSIEVM -ModulesPath $ModuleTarget;
-
-	if(Test-Path($PSIEVMModuleRootPath)) {
-		"Delete $PSIEVMModuleRootPath" | Write-Host;
-		# cmd is used because Remove-Item wont delete a junction
-		cmd /c rmdir "$PSIEVMModuleRootPath";
-	}
-
-	"Creating junction: $PSIEVMModuleRootPath -> $PSIEVMModuleTarget" | Write-Host;
-	cmd /c mklink /j "$PSIEVMModuleRootPath" "$PSIEVMModuleTarget";
-} else {
-	Install-PSIEVM -ModulesPath $ModulesRoot;
+	return [Environment]::GetFolderPath($Name);
 }
 
+function Invoke-ShellCommand {
+	param (
+		[string[]] $CommandArgs
+	)
+	& cmd /c ($CommandArgs -join " ") *>&1 | Write-Host;
+}
+
+function Invoke-Setup {
+
+	$params = ConvertFrom-StringData ($env:chocolateyPackageParameters -replace ';', "`n");
+	$ModulesRoot = $params.PSModuleDirectory;
+
+	if(-not $ModulesRoot) {
+		$ModulesRoot = Get-DocumentsModulePath;
+	}
+
+	if($env:chocolateyPackageFolder) {
+		$ModuleTarget = (Join-Path $env:chocolateyPackageFolder "Modules");
+		$PSIEVMModuleTarget = (Join-Path $ModuleTarget "psievm");
+		$PSIEVMModuleRootPath = (Join-Path $ModulesRoot "psievm");
+
+		Install-PSIEVM -ModulesPath $ModuleTarget;
+
+		if(Test-Path($PSIEVMModuleRootPath)) {
+			"Delete $PSIEVMModuleRootPath" | Write-Host;
+			# cmd is used because Remove-Item wont delete a junction
+			Remove-Item -Path $PSIEVMModuleRootPath -Recurse -Force;
+			Invoke-ShellCommand -CommandArgs "rmdir", "`"$PSIEVMModuleRootPath`"";
+			#cmd /c rmdir "$PSIEVMModuleRootPath";
+		}
+
+		"Creating junction: $PSIEVMModuleRootPath -> $PSIEVMModuleTarget" | Write-Host;
+		Invoke-ShellCommand -CommandArgs "mklink", "/j", "`"$PSIEVMModuleRootPath`"", "`"$PSIEVMModuleTarget`"";
+		#cmd /c mklink /j "$PSIEVMModuleRootPath" "$PSIEVMModuleTarget";
+	} else {
+		Install-PSIEVM -ModulesPath $ModulesRoot;
+	}
+}
+
+if($DoSetup -eq $null -or $DoSetup -eq $true) {
+	Invoke-Setup;
+}
