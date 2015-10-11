@@ -705,7 +705,7 @@ function Expand-7ZipArchive {
 		}
 		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
 	} else {
-		Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force;
+		Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force | Out-Null;
 	}
 }
 

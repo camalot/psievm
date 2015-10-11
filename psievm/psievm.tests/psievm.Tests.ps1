@@ -256,8 +256,11 @@ Describe "Manifest Checks" {
 			Mock Start-Process { "-FilePath: $FilePath -ArgumentList: $ArgumentList" | Write-Host; }
 			Mock Get-ScriptRoot {return "c:\vms\modules\"; };
 			It "Must Create Destination" {
-				Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -Destination "c:\vms\IE9 - Win7\";
+				try {
+					Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\" | Should BeNullOrEmpty;
+				} catch [Exception] {
 
+				}
 				Assert-MockCalled Get-Command -Times 1 -Exactly;
 				Assert-MockCalled Expand-Archive -Times 1 -Exactly;
 				Assert-MockCalled Invoke-DownloadFile -Times 0 -Exactly;
@@ -280,8 +283,11 @@ Describe "Manifest Checks" {
 			Mock Start-Process { $script:resultCommand = "$FilePath $ArgumentList"; }
 			Mock Get-ScriptRoot {return "c:\vms\modules\"; };
 			It "Must Create Destination" {
-				Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\";
+			try {
+					Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\" | Should BeNullOrEmpty;
+				} catch [Exception] {
 
+				}
 				$expectedCommand = "c:\vms\tools\7za.exe x -o`"c:\vms\IE9 - Win7\`" -y `"c:\vms\IE9 - Win7.zip`"";
 			
 				$script:resultCommand | Should BeExactly $expectedCommand;
