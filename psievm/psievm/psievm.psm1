@@ -690,7 +690,7 @@ function Expand-7ZipArchive {
 		[string] $DestinationPath
 	);
 
-	if((Get-Command -Name "Expand-Archive") -eq $null) {
+#	if((Get-Command -Name "Expand-Archive") -eq $null) {
 		$scriptRootPath = Get-ScriptRoot;
 		$toolsDir = (Join-Path -Path $scriptRootPath -ChildPath "tools");
 
@@ -704,9 +704,9 @@ function Expand-7ZipArchive {
 			Invoke-DownloadFile -Url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -File "$7zaExe";
 		}
 		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
-	} else {
-		Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force | Out-Null;
-	}
+	#} else {
+	#	Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force | Out-Null;
+	#}
 }
 
 function Get-ScriptRoot {

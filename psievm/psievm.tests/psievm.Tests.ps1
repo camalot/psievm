@@ -247,33 +247,9 @@ Describe "Manifest Checks" {
 	}
 
 	Describe "Expand-7ipArchive" {
-		Context "When Destination Does not exist and can Expand-Archive" {
-			Mock Get-Command {return @{};} -ParameterFilter { $Name -eq "Expand-Archive" };
-			Mock Expand-Archive { return; };
-			Mock Invoke-DownloadFile { return; };
-			Mock Join-Path { return Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath $ChildPath; } -ParameterFilter { $Path -and $Path -eq $PSScriptRoot };
-			Mock Test-Path { return $false; };
-			Mock Start-Process { "-FilePath: $FilePath -ArgumentList: $ArgumentList" | Write-Host; }
-			Mock Get-ScriptRoot {return "c:\vms\modules\"; };
-			It "Must Create Destination" {
-				try {
-					Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\" | Should BeNullOrEmpty;
-				} catch [Exception] {
+		
 
-				}
-				Assert-MockCalled Get-Command -Times 1 -Exactly;
-				Assert-MockCalled Expand-Archive -Times 1 -Exactly;
-				Assert-MockCalled Invoke-DownloadFile -Times 0 -Exactly;
-				Assert-MockCalled Join-Path -Times 0 -Exactly;
-				Assert-MockCalled Test-Path -Times 0 -Exactly;
-				Assert-MockCalled Start-Process -Times 0 -Exactly;
-				Assert-MockCalled Get-ScriptRoot -Times 0 -Exactly;
-			}
-		}
-
-		Context "When Destination Does not exist and cannot Expand-Archive" {
-			Mock Get-Command {return $null;} -ParameterFilter { $Name -eq "Expand-Archive" };
-			Mock Expand-Archive { return; };
+		Context "When Destination Does not exist" {
 			Mock Invoke-DownloadFile { return; };
 			Mock Join-Path { return "c:\vms\tools\"; } -ParameterFilter { $ChildPath -eq "tools" };
 			Mock Join-Path { return "c:\vms\tools\7za.exe"; } -ParameterFilter { $ChildPath -eq "7za.exe" };
@@ -283,17 +259,11 @@ Describe "Manifest Checks" {
 			Mock Start-Process { $script:resultCommand = "$FilePath $ArgumentList"; }
 			Mock Get-ScriptRoot {return "c:\vms\modules\"; };
 			It "Must Create Destination" {
-			try {
-					Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\" | Should BeNullOrEmpty;
-				} catch [Exception] {
-
-				}
+				Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\" | Should BeNullOrEmpty;
 				$expectedCommand = "c:\vms\tools\7za.exe x -o`"c:\vms\IE9 - Win7\`" -y `"c:\vms\IE9 - Win7.zip`"";
 			
 				$script:resultCommand | Should BeExactly $expectedCommand;
 
-				Assert-MockCalled Get-Command -Times 1 -Exactly;
-				Assert-MockCalled Expand-Archive -Times 0 -Exactly;
 				Assert-MockCalled Invoke-DownloadFile -Times 1 -Exactly;
 				Assert-MockCalled Join-Path -Times 1 -Exactly -ParameterFilter { $ChildPath -eq "tools" };;
 				Assert-MockCalled Join-Path -Times 1 -Exactly -ParameterFilter { $ChildPath -eq "7za.exe" };
