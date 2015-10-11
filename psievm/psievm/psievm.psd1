@@ -58,7 +58,7 @@ PowerShellVersion = '3.0'
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = @('Get-IEVM');
+FunctionsToExport = @('Get-IEVM', 'Update-PSIEVM');
 
 # Cmdlets to export from this module
 CmdletsToExport = '';
@@ -80,7 +80,6 @@ FileList = @("psievm.ps1");
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
-
     PSData = @{
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @("powershell", "virtualmachine", "virtualbox", "internetexplorer", "ie", "vm", "machine", "testing");

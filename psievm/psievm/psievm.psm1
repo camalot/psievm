@@ -19,9 +19,7 @@ this is loosely based on https://github.com/xdissent/ievms/blob/master/ievms.sh
 #>
 
 
-$PSIEVM = "psievm";
-#$PSIEVMManifest = iex (Get-Content -Path "$PSScriptRoot\psievm.psd1" -Raw);
-#$PSIEVMVersion = $PSIEVMManifest.ModuleVersion;
+$script:PSIEVM = "psievm";
 
 #region Exported Functions
 
@@ -298,7 +296,7 @@ function Get-IEVM {
 					}
 				}
 				Write-Host ("Extracting `"$zip`" -> `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
-				Expand-7ipArchive -Path $zip -DestinationPath (Split-Path $zip);
+				Expand-7ZipArchive -Path $zip -DestinationPath (Split-Path $zip);
 				Write-Host ("Deleting `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				Remove-Item -Path $zip -Force | Out-Null;
 			}
@@ -316,13 +314,21 @@ function Get-IEVM {
 			}
 		}
 
-		Start-VMHost -VMHost $VMHost -VMName $vmName -IEUpgrade $IEUpgrade -VMRootPath $VMRootPath;
+		$startResult = Start-VMHost -VMHost $VMHost -VMName $vmName -IEUpgrade $IEUpgrade -VMRootPath $VMRootPath;
+
+		if(-not $startResult) {
+			throw "Error starting VM '$vmName' on host '$VMHost' at '$VMRootPath'";
+		}
 	}
 }
 
 Set-Alias -Name psievm -Value Get-IEVM;
 
+function Update-PSIEVM {
+	iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1"));
+}
 #endregion
+
 
 function Import-VMImage {
 	Param (
@@ -451,11 +457,15 @@ function Start-VBoxVM {
 		[Parameter(Mandatory=$false, Position=2)]
 		[string] $VMRootPath
 	);
-	$vbm = Get-VBoxManageExe;
-	Write-Host "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-	& $vbm startvm `"$VMName`";
+	try {
+		$vbm = Get-VBoxManageExe;
+		Write-Host "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
+		(& $vbm startvm `"$VMName`" *>&1) | Write-Host;
 
-
+		return $true;
+	} catch [Exception] {
+		return $false;
+	}
 	#if($IEUpgrade -ne $null -and $IEUpgrade -ne "") {
 	#	Invoke-VBoxUpgrade -OS $OS -IEUpgradeVersion $IEUpgrade -VMName $VMName -VMRootPath $VMRootPath;
 	#}
@@ -509,10 +519,12 @@ function Invoke-RemoteVBoxCommand {
 #}
 
 function Get-VBoxManageExe {
-	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","${env:ProgramFiles}\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
+	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","$($env:ProgramFiles)\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
 	if($vbm -eq $null) {
 		Write-Host "Unable to locate VirtualBox tools. Installing via Chocolatey.";
-		Install-ChocolateyApp -Names virtualbox, vboxguestadditions.install
+		Install-ChocolateyApp -Names virtualbox, vboxguestadditions.install;
+
+		return "${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe";
 	}
 	return $vbm;
 }
@@ -646,6 +658,10 @@ function Test-MD5Hash {
 		} else {
 			$hash = (Get-FileHash -Path $Path -Algorithm MD5).Hash;
 		}
+		if(!($hashes.ContainsKey($VMHost)) -or !($hashes[$VMHost].ContainsKey($VMName))) {
+			Write-Warning "No Hash Available for $($VMHost):$($VMName)";
+			return $true;
+		}
 		$chash = $hashes[$VMHost][$VMName];
 		if( $chash -eq $null -or $chash -eq "" ) {
 			Write-Warning "No Hash Available for $($VMHost):$($VMName)";
@@ -666,7 +682,7 @@ function Download-File {
   $downloader.DownloadFile($Url, $File);
 }
 
-function Expand-7ipArchive {
+function Expand-7ZipArchive {
 	Param (
 		[Parameter(Mandatory=$true, Position=0)]
 		[string] $Path,
@@ -675,11 +691,13 @@ function Expand-7ipArchive {
 	);
 
 	if((Get-Command -Name "Expand-Archive") -eq $null) {
-		$toolsDir = (Join-Path $PSScriptRoot "tools");
+		$scriptRootPath = Get-ScriptRoot;
+		$toolsDir = (Join-Path -Path $scriptRootPath -ChildPath "tools");
+
 		if(!(Test-Path -Path $toolsDir)) {
 			New-Item -Path $toolsDir -ItemType Directory | Out-Null;
 		}
-		$7zaExe = (Join-Path $toolsDir '7za.exe');
+		$7zaExe = (Join-Path -Path $toolsDir -ChildPath "7za.exe");
 		if(!(Test-Path -Path $7zaExe)) {
 			# download 7zip
 			Write-Host "Download 7Zip commandline tool";
@@ -688,5 +706,13 @@ function Expand-7ipArchive {
 		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
 	} else {
 		Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force;
+	}
+}
+
+function Get-ScriptRoot {
+	if(-not $PSScriptRoot) {
+		return Split-Path -Path $PSCommandPath -Parent;
+	} else {
+		return $PSScriptRoot;
 	}
 }
