@@ -27,7 +27,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Get-IEVM.ps1" />
     <Compile Include="psievm.psd1" />
     <Compile Include="psievm.psm1" />
   </ItemGroup>
