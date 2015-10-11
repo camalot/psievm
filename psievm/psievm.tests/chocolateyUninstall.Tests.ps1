@@ -1,7 +1,14 @@
-$here = Split-Path -Parent $MyInvocation.MyCommand.Path;
+if($PSCommandPath -eq $null) {
+	Write-Host "Using MyInvoction.MyCommand.Path";
+	$CommandRootPath = (Split-Path -Parent $MyInvocation.MyCommand.Path);
+} else {
+	Write-Host "Using PSCommandPath";
+	$CommandRootPath = (Split-Path -Parent $PSCommandPath);
+}
 # This stops the initial invoking of Invoke-Uninstall;
 $DoUninstall = $false;
-."$here\chocolateyUninstall.ps1";
+
+."$CommandRootPath\chocolateyUninstall.ps1";
 
 Describe "Get-DocumentsModulePath" {
 	Context "When MyDocuments Exists" {

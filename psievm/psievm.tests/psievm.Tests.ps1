@@ -1,5 +1,14 @@
-$module = (Split-Path -Leaf $PSCommandPath).Replace(".Tests.ps1", ".psm1");
-$manifestPath = (Split-Path -Leaf $PSCommandPath).Replace(".Tests.ps1", ".psd1");
+if($PSCommandPath -eq $null) {
+	Write-Host "Using MyInvoction.MyCommand.Path";
+	$CommandRootPath = (Split-Path -Parent $MyInvocation.MyCommand.Path);
+} else {
+	Write-Host "Using PSCommandPath";
+	$CommandRootPath = (Split-Path -Parent $PSCommandPath);
+}
+
+$module = Join-Path -Path $CommandRootPath -ChildPath "psievm.psm1";
+$manifestPath = Join-Path -Path $CommandRootPath -ChildPath "psievm.psd1";
+
 #$code = Get-Content $module | Out-String;
 #Invoke-Expression $code -Verbose;
 
