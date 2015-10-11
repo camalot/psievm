@@ -168,7 +168,7 @@ Describe "Manifest Checks" {
 		Context "When VMHost is not VirtualBox and can Get-FileHash" {
 			$vmHost = "VMWare";
 			$vmName = "IE9 - Win7";
-			$path = "c:\vms\IE9 - Win7\IE9 - Win7.vmw";
+			$path = (Join-Path -Path $TestDrive -ChildPath "\IE9 - Win7\IE9 - Win7.vmw");
 
 			Mock Get-Command {return @{};} -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
@@ -188,7 +188,7 @@ Describe "Manifest Checks" {
 		Context "When VMHost is not VirtualBox and cannot Get-FileHash" {
 			$vmHost = "VMWare";
 			$vmName = "IE9 - Win7";
-			$path = "c:\vms\IE9 - Win7\IE9 - Win7.vmw";
+			$path = (Join-Path -Path $TestDrive -ChildPath "\IE9 - Win7\IE9 - Win7.vmw");
 
 			Mock Get-Command {return $null; } -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
@@ -208,7 +208,7 @@ Describe "Manifest Checks" {
 		Context "When VMHost is VirtualBox and cannot Get-FileHash" {
 			$vmHost = "VirtualBox";
 			$vmName = "IE9 - Win7";
-			$path = "c:\vms\IE9 - Win7\IE9 - Win7.vmw";
+			$path = (Join-Path -Path $TestDrive -ChildPath "\IE9 - Win7\IE9 - Win7.vmw");
 
 			Mock Get-Command {return $null;} -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
@@ -228,7 +228,7 @@ Describe "Manifest Checks" {
 		Context "When VMHost is VirtualBox and can Get-FileHash" {
 			$vmHost = "VirtualBox";
 			$vmName = "IE9 - Win7";
-			$path = "c:\vms\IE9 - Win7\IE9 - Win7.vmw";
+			$path = (Join-Path -Path $TestDrive -ChildPath "\IE9 - Win7\IE9 - Win7.vmw");
 
 			Mock Get-Command {return @{};} -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
@@ -250,17 +250,23 @@ Describe "Manifest Checks" {
 		
 
 		Context "When Destination Does not exist" {
+			$rootPath = $TestDrive;
+			$vmName = "IE9 - Win7";
 			Mock Invoke-DownloadFile { return; };
-			Mock Join-Path { return "c:\vms\tools\"; } -ParameterFilter { $ChildPath -eq "tools" };
-			Mock Join-Path { return "c:\vms\tools\7za.exe"; } -ParameterFilter { $ChildPath -eq "7za.exe" };
+			Mock Join-Path { return (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "\tools\"); } -ParameterFilter { $ChildPath -eq "tools" };
+			Mock Join-Path { return (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "\tools\7za.exe"); } -ParameterFilter { $ChildPath -eq "7za.exe" };
 			Mock Test-Path { return $false; };
 			Mock New-Item { };
 			$script:resultCommand = "";
 			Mock Start-Process { $script:resultCommand = "$FilePath $ArgumentList"; }
-			Mock Get-ScriptRoot {return "c:\vms\modules\"; };
+			Mock Get-ScriptRoot {return (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "\Modules\");; };
 			It "Must Create Destination" {
-				Expand-7ZipArchive -Path "c:\vms\IE9 - Win7.zip" -DestinationPath "c:\vms\IE9 - Win7\" | Should BeNullOrEmpty;
-				$expectedCommand = "c:\vms\tools\7za.exe x -o`"c:\vms\IE9 - Win7\`" -y `"c:\vms\IE9 - Win7.zip`"";
+
+				Expand-7ZipArchive -Path (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "$vmName.zip") -DestinationPath (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath $vmName) | Should BeNullOrEmpty;
+				$exe = (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "tools\7za.exe");
+				$folder = (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "$vmName");
+				$zip =  (Microsoft.PowerShell.Management\Join-Path -Path $rootPath -ChildPath "$vmName.zip");
+				$expectedCommand = "$exe x -o`"$folder`" -y `"$zip`"";
 			
 				$script:resultCommand | Should BeExactly $expectedCommand;
 
@@ -287,12 +293,12 @@ Describe "Manifest Checks" {
 
 	Describe "Get-IEVM" {
 		Context "When Invalid IE Version" {
-			$VMRoot = "c:\vms\";
+			$VMRoot = "$TestDrive";
 			$ie = 7;
 			$os = "XP";
 			$vmName = "IE7 - WinXP";
 			$vmHost = "VirtualBox";
-			$altLocation = "c:\vms\";
+			$altLocation = "$TestDrive";
 
 			Mock Test-VMHost { return $true; };
 			Mock Start-VMHost { return $true; };
@@ -314,12 +320,12 @@ Describe "Manifest Checks" {
 		}
 
 		Context "When VM Exists" {
-			$VMRoot = "c:\vms\";
+			$VMRoot = "$TestDrive";
 			$ie = 6;
 			$os = "XP";
 			$vmName = "IE6 - WinXP";
 			$vmHost = "VirtualBox";
-			$altLocation = "c:\vms\";
+			$altLocation = "$TestDrive";
 
 			Mock Test-VMHost { return $true; };
 			Mock Start-VMHost { return $true; };
@@ -335,12 +341,12 @@ Describe "Manifest Checks" {
 		}
 
 		Context "When VM Does Not Exist" {
-			$VMRoot = "c:\vms\";
+			$VMRoot = "$TestDrive";
 			$ie = 6;
 			$os = "XP";
 			$vmName = "IE6 - WinXP";
 			$vmHost = "VirtualBox";
-			$altLocation = "c:\vms\";
+			$altLocation = "$TestDrive";
 
 			$script:zipCheck = 0;
 			$script:ovaCheck = 0;
@@ -386,12 +392,12 @@ Describe "Manifest Checks" {
 		}
 
 		Context "When Error Starting VM" {
-			$VMRoot = "c:\vms\";
+			$VMRoot = "$TestDrive";
 			$ie = 6;
 			$os = "XP";
 			$vmName = "IE6 - WinXP";
 			$vmHost = "VirtualBox";
-			$altLocation = "c:\vms\";
+			$altLocation = "$TestDrive";
 
 			$script:zipCheck = 0;
 			$script:ovaCheck = 0;

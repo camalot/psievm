@@ -13,7 +13,7 @@ Copy-Item -Path "$psModuleFiles" -Destination "$workingDir" -Force -Verbose;
 Copy-Item -Path "$psChocoFiles" -Destination "$workingDir" -Force -Verbose;
 $tests = (Get-ChildItem -Path "$workingDir\*.Tests.ps1" | % { $_.FullName });
 
-New-Item -Path (Join-Path -Path $workingDir -ChildPath "results") -ItemType Directory -Force;
+New-Item -Path (Join-Path -Path $workingDir -ChildPath "results") -ItemType Directory -Force | Out-Null;
 $resultsOutput = (Join-Path -Path $workingDir -ChildPath "results\nunit-results.xml");
 
 
