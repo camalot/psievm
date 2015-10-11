@@ -325,6 +325,12 @@ function Get-IEVM {
 Set-Alias -Name psievm -Value Get-IEVM;
 
 function Update-PSIEVM {
+	<#
+	.SYNOPSIS
+	Updates the installed version to the latest version that is available on github.
+	.EXAMPLE
+	Update-PSIEVM
+	#>
 	iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1"));
 }
 #endregion

@@ -1,9 +1,9 @@
 $module = (Split-Path -Leaf $PSCommandPath).Replace(".Tests.ps1", ".psm1");
 $manifestPath = (Split-Path -Leaf $PSCommandPath).Replace(".Tests.ps1", ".psd1");
-$code = Get-Content $module | Out-String;
-Invoke-Expression $code -Verbose;
+#$code = Get-Content $module | Out-String;
+#Invoke-Expression $code -Verbose;
 
-#Import-Module "$module" -Force -Verbose;
+Import-Module $manifestPath -Force -Verbose;
 
 Describe "Manifest Checks" {
 	$script:manifest = $null;
@@ -14,23 +14,31 @@ Describe "Manifest Checks" {
 	}
 
 	It "Has a valid version in the manifest" {
-		$script:manifest.Version -as [Version] | Should Not BeNullOrEmpty
+		$script:manifest.Version -as [Version] | Should Not BeNullOrEmpty;
 	}
 
 	It "Has a valid GUID in the manifest" {
-		$script:manifest.Guid | Should Be '1e452af5-f4d1-41c1-88f8-e2de734b9db6'
+		$script:manifest.Guid | Should Be '1e452af5-f4d1-41c1-88f8-e2de734b9db6';
 	}
 
-	It "Exports only Get-IEVM" {
-		$script:manifest.ExportedFunctions.Values -join "|" | Should Be "Get-IEVM|Update-PSIEVM"
+	It "Exports Get-IEVM and Update-PSIEVM" {
+		$script:manifest.ExportedFunctions.Values -join "|" | Should Be "Get-IEVM|Update-PSIEVM";
 	}
 
 	It "Aliases only psievm" {
-		$script:manifest.ExportedAliases.Values -join "|" | Should Be "psievm"
+		$script:manifest.ExportedAliases.Values -join "|" | Should Be "psievm";
+	}
+
+	It "Must have a version of 0.0.0.0" {
+		$script:manifest.Version | Should Be "0.0.0.0";
+	}
+
+	It "Must support PowerShell Version 3.0" {
+		$script:manifest.PowerShellVersion | Should Be "3.0";
 	}
 }
 
-#InModuleScope $module {
+InModuleScope "psievm" {
 	Describe "Start-VMHost" {
 		Context "When VMHost is not VirtualBox" {
 			$vmHost = "VMWare";
@@ -449,5 +457,5 @@ Describe "Manifest Checks" {
 
 			}
 		}
-	#}
+	}
 }

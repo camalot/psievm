@@ -1,6 +1,6 @@
 # ![PSIEVM][14] psievm [![Build status][15]][16]
 
- *psievm* is a powershell module for standing up an IE VM quickly and without hassle. This will do all the steps needed to get the VM running. 
+ *psievm* is a powershell module for automating an IE Virtual Machine quickly and without hassle to help make cross browser testing easier. This will do all the steps needed to get the VM running. 
 
 - Install the VM Host (if needed, and supported)
 - Download the VM image
@@ -41,8 +41,15 @@ Chocolatey (initial package is awaiting moderation):
 | IgnoreInvalidMD5    	|    NO    	| Switch  	| $False     	| If the script should ignore failed MD5 hash validation |
 | VMRootPath            |    NO     | String    | $PWD        | The location to put the VM images |
 
+
+#### Other Functions
+
+    PS > Update-PSIEVM
+This will update your installed version of PSIEVM by getting the latest release that is available on GitHub. Once there is a "non-pre-release" version
+There will be an option to get the latest pre-release.
+
 #### OS / IEVersion
-This is the version of the OS that you want hosted and the version of IE you want with it. Here are the supported values:
+This is the version of the OS that you want hosted and the version of Internet Explorer / Edge you want with it. Here are the supported values:
 
 |        	| IE 6 	| IE 7 	| IE 8 	| IE 9 	| IE 10 	| IE 11 	| MS Edge 	| Requires 64-bit Emulation |
 |--------	|:----:	|:----:	|:----:	|:----:	|:-----:	|:-----:	|:-------:	|:------------------------: |
@@ -58,13 +65,6 @@ This is the version of the OS that you want hosted and the version of IE you wan
 
 - [VirtualBox][4] _[default]_
  - If not installed, [chocolatey][1] will be used to install [VirtualBox][2], and the [Guest Additions][3].
-- [Vagrant][6] _[possible future support]_
- - If not installed, [chocolatey][1] will be used to install [Vagrant][5].
-- [VMWare][7] _[possible future support]_
- - If not installed, [chocolatey][1] will be used to install [VMWare Player][8].
-- HyperV _[possible future support]_
-- VirtualPC _[possible future support]_
-
 
 #### [Microsoft Internet Explorer Announcement][12]
 
