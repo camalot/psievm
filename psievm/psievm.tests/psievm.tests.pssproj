@@ -28,6 +28,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="chocolateyInstall.Tests.ps1" />
+    <Compile Include="chocolateyUninstall.Tests.ps1" />
     <Compile Include="psievm.Tests.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

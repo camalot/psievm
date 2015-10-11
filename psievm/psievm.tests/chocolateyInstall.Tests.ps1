@@ -115,3 +115,25 @@ Describe "Invoke-Setup" {
 		}
 	}
 }
+
+Describe "Invoke-ShellCommand" {
+	Context "When command is to make new directory" {
+		$target = Join-Path -Path "$TestDrive" -ChildPath "testPath";
+
+		It "Must create the directory" {
+			Invoke-ShellCommand -CommandArgs "mkdir", "`"$target`"";
+			Test-Path -Path $target | Should Be $true;
+		}
+	}
+
+	Context "When command is to delete a directory" {
+		$target = Join-Path -Path "$TestDrive" -ChildPath "testPath";
+		It "Must delete the directory" {
+			Invoke-ShellCommand -CommandArgs "mkdir", "`"$target`"";
+			# check that it was created
+			Test-Path -Path $target | Should Be $true;
+			Invoke-ShellCommand -CommandArgs "rmdir", "/S", "/Q", "`"$target`"";
+			Test-Path -Path $target | Should Be $false;
+		}
+	}
+}

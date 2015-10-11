@@ -102,6 +102,11 @@ function Get-LatestGithubRelease {
 	}
 }
 
+
+# I hate that these are duplicated in both the install and uninstall
+# but because the install is also used to invoke a non-chocolatey install
+# via the iex web download, it cannot import an external file easily.
+# So they will remain duplicated for now.
 function Get-DocumentsModulePath {
 	$docsPath = (Get-EnvironmentFolderPath -Name MyDocuments);
 	if(-not $docsPath) {
@@ -148,7 +153,7 @@ function Invoke-Setup {
 			"Delete $PSIEVMModuleRootPath" | Write-Host;
 			# cmd is used because Remove-Item wont delete a junction
 			Remove-Item -Path $PSIEVMModuleRootPath -Recurse -Force;
-			Invoke-ShellCommand -CommandArgs "rmdir", "`"$PSIEVMModuleRootPath`"";
+			Invoke-ShellCommand -CommandArgs "rmdir", "/S", "/Q", "`"$PSIEVMModuleRootPath`"";
 			#cmd /c rmdir "$PSIEVMModuleRootPath";
 		}
 
@@ -160,6 +165,6 @@ function Invoke-Setup {
 	}
 }
 
-if($DoSetup -eq $null -or $DoSetup -eq $true) {
+if( ($DoSetup -eq $null) -or ($DoSetup -eq $true) ) {
 	Invoke-Setup;
 }
