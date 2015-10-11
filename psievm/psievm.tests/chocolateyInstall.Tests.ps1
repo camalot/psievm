@@ -44,7 +44,7 @@ Describe "Install-PSIEVM" {
 			return Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "7za.exe";
 		} -ParameterFilter { $ChildPath -eq "7za.exe" };
 		Mock Get-ChildItem { 
-			return Microsoft.PowerShell.Management\Get-ChildItem -Path $TestDrive -File -Recurse -Depth 1; 
+			return Microsoft.PowerShell.Management\Get-ChildItem -Path $TestDrive -File -Recurse; 
 		};
 		Mock Invoke-DownloadFile { };
 		Mock Unblock-File { return; };
