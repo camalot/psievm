@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+		http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -672,14 +672,14 @@ function Test-MD5Hash {
 	}
 }
 
-function Download-File {
-  Param (
-    [string] $Url,
-    [string] $File
-  );
-  $downloader = (new-object System.Net.WebClient);
-  $downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
-  $downloader.DownloadFile($Url, $File);
+function Invoke-DownloadFile {
+	Param (
+		[string] $Url,
+		[string] $File
+	);
+	$downloader = (new-object System.Net.WebClient);
+	$downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
+	$downloader.DownloadFile($Url, $File);
 }
 
 function Expand-7ZipArchive {
@@ -701,7 +701,7 @@ function Expand-7ZipArchive {
 		if(!(Test-Path -Path $7zaExe)) {
 			# download 7zip
 			Write-Host "Download 7Zip commandline tool";
-			Download-File -Url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -File "$7zaExe";
+			Invoke-DownloadFile -Url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -File "$7zaExe";
 		}
 		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
 	} else {

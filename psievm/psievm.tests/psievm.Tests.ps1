@@ -130,7 +130,7 @@ Describe "Manifest Checks" {
 			# The first time this is called, it should return false.
 			Mock Test-Path { $script:tpathCalled += 1; return @{$true=$false;$false=$true}[$script:tpathCalled -eq 1] };
 			Mock Invoke-InstallChocolatey { };
-
+			Mock Write-Host { return; } -ParameterFilter { $BackgroundColor -eq "Red" };
 			It "Must install chocolatey" {
 				Get-ChocolateyExe | Should BeExactly "$env:ProgramData\chocolatey\choco.exe";
 				Assert-MockCalled -CommandName Invoke-InstallChocolatey -Times 1 -Exactly;
@@ -142,6 +142,7 @@ Describe "Manifest Checks" {
 			$chocoPath = "$env:ProgramData\chocolatey\choco.exe";
 			Mock Test-Path { return $false; };
 			Mock Invoke-InstallChocolatey { };
+			Mock Write-Host { return; } -ParameterFilter { $BackgroundColor -eq "Red" };
 			It "Must throw FileNotFoundException" {
 				{ return Get-ChocolateyExe } | Should Throw;
 				Assert-MockCalled -CommandName Invoke-InstallChocolatey -Times 1 -Exactly;
@@ -247,9 +248,9 @@ Describe "Manifest Checks" {
 
 	Describe "Expand-7ipArchive" {
 		Context "When Destination Does not exist and can Expand-Archive" {
-			Mock Get-Command {return @{};};
+			Mock Get-Command {return @{};} -ParameterFilter { $Name -eq "Expand-Archive" };
 			Mock Expand-Archive { return; };
-			Mock Download-File { return; };
+			Mock Invoke-DownloadFile { return; };
 			Mock Join-Path { return Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath $ChildPath; } -ParameterFilter { $Path -and $Path -eq $PSScriptRoot };
 			Mock Test-Path { return $false; };
 			Mock Start-Process { "-FilePath: $FilePath -ArgumentList: $ArgumentList" | Write-Host; }
@@ -259,7 +260,7 @@ Describe "Manifest Checks" {
 
 				Assert-MockCalled Get-Command -Times 1 -Exactly;
 				Assert-MockCalled Expand-Archive -Times 1 -Exactly;
-				Assert-MockCalled Download-File -Times 0 -Exactly;
+				Assert-MockCalled Invoke-DownloadFile -Times 0 -Exactly;
 				Assert-MockCalled Join-Path -Times 0 -Exactly;
 				Assert-MockCalled Test-Path -Times 0 -Exactly;
 				Assert-MockCalled Start-Process -Times 0 -Exactly;
@@ -268,9 +269,9 @@ Describe "Manifest Checks" {
 		}
 
 		Context "When Destination Does not exist and cannot Expand-Archive" {
-			Mock Get-Command {return $null;};
+			Mock Get-Command {return $null;} -ParameterFilter { $Name -eq "Expand-Archive" };
 			Mock Expand-Archive { return; };
-			Mock Download-File { return; };
+			Mock Invoke-DownloadFile { return; };
 			Mock Join-Path { return "c:\vms\tools\"; } -ParameterFilter { $ChildPath -eq "tools" };
 			Mock Join-Path { return "c:\vms\tools\7za.exe"; } -ParameterFilter { $ChildPath -eq "7za.exe" };
 			Mock Test-Path { return $false; };
@@ -287,7 +288,7 @@ Describe "Manifest Checks" {
 
 				Assert-MockCalled Get-Command -Times 1 -Exactly;
 				Assert-MockCalled Expand-Archive -Times 0 -Exactly;
-				Assert-MockCalled Download-File -Times 1 -Exactly;
+				Assert-MockCalled Invoke-DownloadFile -Times 1 -Exactly;
 				Assert-MockCalled Join-Path -Times 1 -Exactly -ParameterFilter { $ChildPath -eq "tools" };;
 				Assert-MockCalled Join-Path -Times 1 -Exactly -ParameterFilter { $ChildPath -eq "7za.exe" };
 				Assert-MockCalled Test-Path -Times 2 -Exactly;
