@@ -5,7 +5,7 @@ if(-not (Get-Module -ListAvailable -Name "pester")) {
 
 Import-Module "pester" -Verbose -Force;
 $cdir = $PWD;
-$workingDir = (Join-Path -Path "$env:APPVEYOR_BUILD_FOLDER" -ChildPath "psievm\psievm.tests\");
+$workingDir = (Join-Path -Path "$env:APPVEYOR_BUILD_FOLDER" -ChildPath "psievm\psievm.tests\" -Resolve);
 Set-Location -Path $workingDir | Out-Null;
 $psModuleFiles = "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm\psievm.ps*1";
 $psChocoFiles = "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm.package\tools\*.ps1";

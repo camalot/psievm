@@ -7,7 +7,12 @@
 		<Code Include="$(CI_PROJECT_PATH)\$(CI_PROJECT_NAME)\$(CI_PROJECT_NAME).ps*1" />
 	</ItemGroup>
 
-	<Target Name="Build" DependsOnTargets="SetBuildNumber;CopyModuleFilesToOutput;AssemblyInfo;ZipRelease;ChocolateyPack">
+	<PropertyGroup>
+		<TestsPath Condition=" '$(PesterPath)' == '' ">$(CI_PROJECT_PATH)psievm.tests\</TestsPath>
+		<PowerShellExe>$(WINDIR)\System32\WindowsPowerShell\v1.0\Powershell.exe</PowerShellExe>
+	</PropertyGroup>
+
+	<Target Name="Build" DependsOnTargets="SetBuildNumber;CopyModuleFilesToOutput;AssemblyInfo;ZipRelease;ChocolateyPack;RunTests;">
 		
 	</Target>
 
@@ -77,6 +82,12 @@ $(CI_PROJECT_URL)" Files="@(ZipFiles);"
 
 		<Delete Files="@(Leftovers)" ContinueOnError="true" />
 		<RemoveDir Directories="$(PackOutputPath)\tools\" ContinueOnError="true" />
+
+		<CreateItem Include="$(PackOutputPath)\**\*.nupkg">
+			<Output ItemName="Nupkg" TaskParameter="Include"/>
+		</CreateItem>
+
+		<Move SourceFiles="@(Nupkg)" DestinationFolder="$(CI_PROJECT_PATH)\bin\$(CI_BUILD_VERSION)\" ContinueOnError="false" OverwriteReadOnlyFiles="true" />
 		
 		<Message Text=" " Importance="High" />
 		<Message Text="Build Exit Code: $(ExitCode)" Importance="High" />
@@ -104,6 +115,18 @@ $(CI_PROJECT_URL)" Files="@(ZipFiles);"
 			<Output PropertyName="CI_BUILD_VERSION" TaskParameter="Value" />
 		</CreateProperty>
 
+	</Target>
+
+	<Target Name="RunTests" Condition=" '$(CI)' == 'False' ">
+		
+
+		<Error Code="500" Text="Cannot have empty version string" Condition=" '$(CI_BUILD_VERSION' == '' " />
+		<Exec Command="$(PowerShellExe) -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; { &quot;$(MSBuildProjectDirectory)\Invoke-Tests.ps1&quot; -Version &quot;$(CI_BUILD_VERSION)&quot; }&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+
+		<CreateItem Include="$(TestsPath)psievm.psm1;$(TestsPath)psievm.psd1;$(TestsPath)*.ps1;" Exclude="$(TestsPath)**\*.Tests.ps1">
+			<Output ItemName="PesterDestFiles" TaskParameter="Include"/>
+		</CreateItem>
+		<Delete Files="@(PesterDestFiles)" />
 	</Target>
 
 	<UsingTask

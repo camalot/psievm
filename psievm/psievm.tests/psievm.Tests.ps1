@@ -9,9 +9,6 @@ if($PSCommandPath -eq $null) {
 $module = Join-Path -Path $CommandRootPath -ChildPath "psievm.psm1";
 $manifestPath = Join-Path -Path $CommandRootPath -ChildPath "psievm.psd1";
 
-#$code = Get-Content $module | Out-String;
-#Invoke-Expression $code -Verbose;
-
 Import-Module $manifestPath -Force -Verbose;
 
 Describe "Manifest Checks" {
