@@ -5,16 +5,24 @@ if(-not (Get-Module -ListAvailable -Name "pester")) {
 
 Import-Module "pester" -Verbose -Force;
 $cdir = $PWD;
+
+if(-not $env:CI_BUILD_VERSION) {
+	throw "Unable to find a value in CI_BUILD_VERSION";
+}
+
+$binDir = (Join-Path -Path "$env:APPVEYOR_BUILD_FOLDER" -ChildPath "psievm\bin\$env:CI_BUILD_VERSION\" -Resolve);
 $workingDir = (Join-Path -Path "$env:APPVEYOR_BUILD_FOLDER" -ChildPath "psievm\psievm.tests\" -Resolve);
 Set-Location -Path $workingDir | Out-Null;
 $psModuleFiles = "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm\psievm.ps*1";
 $psChocoFiles = "$env:APPVEYOR_BUILD_FOLDER\psievm\psievm.package\tools\*.ps1";
+
 Copy-Item -Path "$psModuleFiles" -Destination "$workingDir" -Force -Verbose;
 Copy-Item -Path "$psChocoFiles" -Destination "$workingDir" -Force -Verbose;
+
 $tests = (Get-ChildItem -Path "$workingDir\*.Tests.ps1" | % { $_.FullName });
 
 New-Item -Path (Join-Path -Path $workingDir -ChildPath "results") -ItemType Directory -Force | Out-Null;
-$resultsOutput = (Join-Path -Path $workingDir -ChildPath "results\nunit-results.xml");
+$resultsOutput = (Join-Path -Path $binDir -ChildPath "psievm-tests.results.xml");
 
 
 Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit;

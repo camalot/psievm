@@ -27,13 +27,11 @@ after_build:
 test_script:
 - ps: .\psievm\.appveyor\appveyor.run-tests.ps1
 artifacts:
-- path: '**\bin\**\psievm.ps*1'
-  name: PSModule
 - path: '**\bin\**\psievm.*.zip'
   name: Zip
 - path: '**\bin\**\psievm.*.nupkg'
   name: Nupkg
-- path: '**\nunit-results.xml'
+- path: '**\bin\**\psievm-tests.results.xml'
   name: NUnit
 before_deploy:
 - ps: .\psievm\.appveyor\appveyor.before-deployment.ps1

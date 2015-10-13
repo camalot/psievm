@@ -1,4 +1,4 @@
-# ![PSIEVM][14] psievm [![Build status][15]][16]
+# ![PSIEVM][14] psievm [![Build status][15]][16] [![volkswagen status][17]][18]
 
  *psievm* is a powershell module for automating an IE Virtual Machine quickly and without hassle to help make cross browser testing easier. This will do all the steps needed to get the VM running. 
 
@@ -90,3 +90,5 @@ This is the version of the OS that you want hosted and the version of Internet E
 [14]: https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/assets/psievm.png
 [15]: https://ci.appveyor.com/api/projects/status/kxd0a7tvffjiqgm7?svg=true
 [16]: https://ci.appveyor.com/project/camalot/psievm
+[17]: https://auchenberg.github.io/volkswagen/volkswargen_ci.svg?v=1
+[18]: https://github.com/auchenberg/volkswagen
