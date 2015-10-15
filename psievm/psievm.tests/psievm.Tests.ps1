@@ -180,14 +180,18 @@ InModuleScope "psievm" {
 
 	Describe "Invoke-InstallChocolatey" {
 		It "Should download and install chocolatey" {
-			Mock Invoke-Expression { };
+			Mock Invoke-Expression { 
+				param ( [string] $Command );
+
+			};
 			Mock New-Object {
         $retval = [PSCustomObject]@{};
         Add-Member -InputObject $retval -MemberType ScriptMethod DownloadString {
-            param( [string] $url )
+            param( [string] $url );
+					return "Write-Host `"Choco Script`"";
         }
         return $retval;
-    } -ParameterFilter {$TypeName -and ($TypeName -ilike 'System.Net.WebClient') }
+    } -ParameterFilter {$TypeName -and ($TypeName -ilike 'Net.WebClient') }
 			Invoke-InstallChocolatey | Should BeNullOrEmpty;
 			Assert-MockCalled Invoke-Expression -Times 1 -Exactly;
 		}

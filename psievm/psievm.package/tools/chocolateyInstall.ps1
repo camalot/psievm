@@ -88,7 +88,7 @@ function Get-LatestGithubRelease {
 		}
 	}
 	process {
-		$webclient = New-Object net.webclient;
+		$webclient = New-Object -TypeName "net.webclient";
 		"Getting latest release information from GitHub Repository $Owner/$Repo" | Write-Host;
 		$webclient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.52 Safari/537.36");
 		$webclient.Headers.Add("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");

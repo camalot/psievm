@@ -192,9 +192,27 @@ Describe "Invoke-DownloadFile" {
 }
 
 Describe "Get-LatestGithubRelease" {
+	$url = "https://raw.githubusercontent.com/camalot/psievm/master/README.md";
+	Mock New-Object {
+		$retval = [PSCustomObject]@{
+			Headers = [PSCustomObject]@{};
+
+		};
+		Add-Member -InputObject $retval -MemberType ScriptMethod DownloadString {
+				return "[{ 
+				assets: [{
+					browser_download_url: `"$url`"
+				}]
+				}]";
+		};
+		Add-Member -InputObject $retval.Headers -MemberType ScriptMethod Add {
+			return;
+		}
+		return $retval;
+	} -ParameterFilter {$TypeName -and ($TypeName -ilike 'net.webclient') }
+
 	It "Should return a valid download url" {
-		Get-LatestGithubRelease -Owner "camalot" -Repo "psievm" | Should Not BeNullOrEmpty;
-		$latest;
+		Get-LatestGithubRelease -Owner "camalot" -Repo "psievm" | Should Be $url;
 	}
 }
 
