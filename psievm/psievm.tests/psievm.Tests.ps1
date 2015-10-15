@@ -185,13 +185,13 @@ InModuleScope "psievm" {
 
 			};
 			Mock New-Object {
-        $retval = [PSCustomObject]@{};
-        Add-Member -InputObject $retval -MemberType ScriptMethod DownloadString {
-            param( [string] $url );
+				$retval = [PSCustomObject]@{};
+				Add-Member -InputObject $retval -MemberType ScriptMethod DownloadString {
+						param( [string] $url );
 					return "Write-Host `"Choco Script`"";
-        }
-        return $retval;
-    } -ParameterFilter {$TypeName -and ($TypeName -ilike 'Net.WebClient') }
+				}
+				return $retval;
+		} -ParameterFilter {$TypeName -and ($TypeName -ilike 'Net.WebClient') }
 			Invoke-InstallChocolatey | Should BeNullOrEmpty;
 			Assert-MockCalled Invoke-Expression -Times 1 -Exactly;
 		}
@@ -369,6 +369,23 @@ InModuleScope "psievm" {
 	}
 
 	Describe "Get-IEVM" {
+		Context "When Invalid VMHost" {
+			$VMRoot = "$TestDrive";
+			$ie = 7;
+			$os = "XP";
+			$vmName = "IE7 - WinXP";
+			$vmHost = "VMWare";
+			$altLocation = "$TestDrive";
+			It "Must throw error" {
+				$error = $null;
+				try {
+					Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost;
+				} catch [Exception] {
+					$error = $_;
+				}
+				$error | Should Not BeNullOrEmpty;
+			}
+		}
 		Context "When Invalid IE Version" {
 			$VMRoot = "$TestDrive";
 			$ie = 7;
@@ -970,6 +987,19 @@ InModuleScope "psievm" {
 			}
 			It "Must return true" {
 				Test-VBoxVM -VMName $vmName | Should Be $true;
+			}
+		}
+
+		Context "When Invoke-ShellCommand errors" {
+			$vmName = "IE11 - Win10";
+			Mock Get-VBoxManageExe {
+				return Join-Path -Path $TestDrive -ChildPath "VBoxManage.exe";
+			}
+			Mock Invoke-ShellCommand {
+				throw "Error message";
+			}
+			It "Must return false" {
+				Test-VBoxVM -VMName $vmName | Should Be $false;
 			}
 		}
 	}

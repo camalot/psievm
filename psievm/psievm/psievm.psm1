@@ -183,32 +183,10 @@ function Get-IEVM {
 		$vmPath = (Join-Path -Path $VMRootPath -ChildPath $vmName);
 
 		switch ($VMHost) {
-			"HyperV" {
-				$VMHost = "HyperV_2012";
-				$vmext = "vhd";
-				throw "Currently unsupported VMHost : $VMHost";
-				return;
-			}
 			"VirtualBox" {
 				$vmext = "ova";
 			}
-			"Vagrant" {
-				$vmext = "box";
-				throw "Currently unsupported VMHost : $VMHost";
-				return;
-			}
-			"VMWare" {
-				throw "Currently unsupported VMHost : $VMHost";
-				return;
-			}
-			"VPC" {
-				throw "Currently unsupported VMHost : $VMHost";
-				return;
-			}
-			default {
-				throw "Unknown VMHost : $VMHost";
-				return;
-			}
+			# There is no default, because if it isn't valid, it wont get this far.
 		}
 
 		switch($OS) {
