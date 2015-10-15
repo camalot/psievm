@@ -56,8 +56,8 @@ Describe "Install-PSIEVM" {
 		Mock Unblock-File { return; };
 		Mock Start-Process { return; };
 		Mock Remove-Item { return; };
-		Mock New-Item { return; }
-		Mock Write-Host { return; }
+		Mock New-Item { return; };
+		Mock Write-Host { return; };
 		It "Must Install From Github Release" {
 			Install-PSIEVM -ModulesPath (Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\WindowsPowerShell\Modules\") | Should BeNullOrEmpty;
 			Assert-MockCalled Get-LatestGithubRelease -Times 1 -Exactly;	
@@ -67,6 +67,43 @@ Describe "Install-PSIEVM" {
 			Assert-MockCalled Invoke-DownloadFile -Times 2 -Exactly;
 			Assert-MockCalled Start-Process -Times 1 -Exactly;
 			Assert-MockCalled Remove-Item -Times 1 -Exactly;
+			Assert-MockCalled Test-Path -Times 3 -Exactly;
+		}
+	}
+
+	Context "When Installing and paths do not exist" {
+		Mock Test-Path { return $false; };
+		Mock Get-LatestGithubRelease { 
+			return "https://github.com/camalot/psievm/releases/download/psievm-v0.1.44.28215/psievm.0.1.44.28215.zip";
+		};
+		Mock Join-Path { 
+			return Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "psievm";
+		} -ParameterFilter { $ChildPath -eq "psievm" };
+		Mock Join-Path {
+			return Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\psievm\psievm.zip";
+		} -ParameterFilter { $ChildPath -eq "psievm.zip" };
+		Mock Join-Path { 
+			return Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "7za.exe";
+		} -ParameterFilter { $ChildPath -eq "7za.exe" };
+		Mock Get-ChildItem { 
+			return Microsoft.PowerShell.Management\Get-ChildItem -Path $TestDrive -File -Recurse; 
+		};
+		Mock Invoke-DownloadFile { };
+		Mock Unblock-File { return; };
+		Mock Start-Process { return; };
+		Mock Remove-Item { return; };
+		Mock New-Item { return; };
+		Mock Write-Host { return; };
+		It "Must Install From Github Release" {
+			Install-PSIEVM -ModulesPath (Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\WindowsPowerShell\Modules\") | Should BeNullOrEmpty;
+			Assert-MockCalled Get-LatestGithubRelease -Times 1 -Exactly;	
+			Assert-MockCalled Join-Path -Times 2 -Exactly -ParameterFilter { $ChildPath -eq "psievm" };	
+			Assert-MockCalled Join-Path -Times 1 -Exactly -ParameterFilter { $ChildPath -eq "psievm.zip" };
+			Assert-MockCalled New-Item -Times 2 -Exactly;
+			Assert-MockCalled Invoke-DownloadFile -Times 2 -Exactly;
+			Assert-MockCalled Start-Process -Times 1 -Exactly;
+			Assert-MockCalled Remove-Item -Times 0 -Exactly;
+			Assert-MockCalled Test-Path -Times 3 -Exactly;
 		}
 	}
 }
@@ -140,6 +177,43 @@ Describe "Invoke-ShellCommand" {
 			Test-Path -Path $target | Should Be $true;
 			Invoke-ShellCommand -CommandArgs "rmdir", "/S", "/Q", "`"$target`"";
 			Test-Path -Path $target | Should Be $false;
+		}
+	}
+}
+
+Describe "Invoke-DownloadFile" {
+	It "Should download file" {
+		$url = "https://raw.githubusercontent.com/camalot/psievm/master/README.md";
+		$file = Join-Path -Path $TestDrive -ChildPath "README.md";
+
+		Invoke-DownloadFile -File $file -Url $url | Should BeNullOrEmpty;
+		Test-Path -Path $file | Should Be $true;
+	}
+}
+
+Describe "Get-LatestGithubRelease" {
+	It "Should return a valid download url" {
+		Get-LatestGithubRelease -Owner "camalot" -Repo "psievm" | Should Not BeNullOrEmpty;
+		$latest;
+	}
+}
+
+Describe "Get-EnvironmentFolderPath" {
+	Context "When it exists" {
+		It "Should return the path" {
+			Get-EnvironmentFolderPath -Name "ApplicationData" | Should Not BeNullOrEmpty;
+		}
+	}
+	Context "When it does not exist" {
+		It "Should throw" {
+			$error = $null;
+			try {
+				Get-EnvironmentFolderPath -Name "MadeUpName";
+			} catch [Exception] {
+				$error = $_;
+			}
+
+			$error | Should Not Be $null;
 		}
 	}
 }

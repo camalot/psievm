@@ -1,4 +1,3 @@
-
 if(-not (Get-Module -ListAvailable -Name "pester")) {
 	choco install pester -y | Write-Host;
 }
@@ -24,10 +23,13 @@ $tests = (Get-ChildItem -Path "$workingDir\*.Tests.ps1" | % { $_.FullName });
 New-Item -Path (Join-Path -Path $workingDir -ChildPath "results") -ItemType Directory -Force | Out-Null;
 $resultsOutput = (Join-Path -Path $binDir -ChildPath "psievm-tests.results.xml");
 
+$coverageFiles = (Get-ChildItem -Path "$workingDir\*.ps*1") | where { $_.Name -inotmatch "\.tests\.ps1$" -and $_.Name -inotmatch "\.psd1$" } | % { $_.FullName };
 
-Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit;
+Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit -CodeCoverage $coverageFiles -Strict;
 
-$wc = New-Object "System.Net.WebClient";
-$wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $resultsOutput);
+if($evn:APPVEYOR) {
+	$wc = New-Object "System.Net.WebClient";
+	$wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $resultsOutput);
+}
 
 Set-Location -Path $cdir | Out-Null;

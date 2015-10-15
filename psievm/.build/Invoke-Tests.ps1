@@ -35,9 +35,9 @@ Copy-Item -Path "$psModuleFiles" -Destination "$testsDir" -Force -Verbose;
 Copy-Item -Path "$psChocoFiles" -Destination "$testsDir" -Force -Verbose;
 
 $tests = (Get-ChildItem -Path "$testsDir\*.Tests.ps1" | % { $_.FullName });
-
+$coverageFiles = (Get-ChildItem -Path "$testsDir\*.ps*1") | where { $_.Name -inotmatch "\.tests\.ps1$" -and $_.Name -inotmatch "\.psd1$" } | % { $_.FullName };
 $resultsOutput = (Join-Path -Path $outDir -ChildPath "psievm-tests.results.xml");
 
-Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit;
+Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -CodeCoverage $coverageFiles -EnableExit -Strict;
 
 Set-Location -Path $cdir | Out-Null;

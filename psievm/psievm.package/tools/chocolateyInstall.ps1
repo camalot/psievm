@@ -5,14 +5,14 @@ $name   = 'psievm'
 
 function Invoke-DownloadFile {
 	Param (
-		[string]$url,
-		[string]$file
+		[string]$Url,
+		[string]$File
 	);
 	process {
-		"Downloading $url to $file" | Write-Host;
+		"Downloading $Url to $File" | Write-Host;
 		$downloader = new-object System.Net.WebClient;
 		$downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
-		$downloader.DownloadFile($url, $file);
+		$downloader.DownloadFile($Url, $File);
 	}
 }
 
@@ -26,9 +26,6 @@ function Install-PSIEVM {
 		"Copyright (c) 2015 Ryan Conrad" | Write-Host;
 		"License: https://github.com/camalot/psievm/blob/master/LICENSE.md" | Write-Host;
 		$url = (Get-LatestGithubRelease -Owner camalot -Repo psievm);
-		if ($env:TEMP -eq $null) {
-			$env:TEMP = (Join-Path $env:SystemDrive 'temp');
-		}
 
 		$tempDir = (Join-Path $env:TEMP "psievm");
 		if(!(Test-Path -Path $tempDir)) {

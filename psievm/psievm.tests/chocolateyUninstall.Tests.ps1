@@ -90,5 +90,56 @@ Describe "Invoke-Uninstall" {
 		}
 
 	}
+
+	Context "When PSModuleDirectory not specified" {
+		
+		$env:chocolateyPackageFolder = (Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\chocolatey\lib\psievm\")
+		$target = (Microsoft.PowerShell.Management\Join-Path -Path $env:chocolateyPackageFolder -ChildPath "Modules");
+		Mock ConvertFrom-StringData { return $null };
+		Mock Get-DocumentsModulePath { 
+			return (Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\WindowsPowerShell\Modules\"); 
+		};
+		Mock Join-Path { 
+			return (Microsoft.PowerShell.Management\Join-Path -Path $Path -ChildPath $ChildPath);
+		}
+		Mock Join-Path {
+			return (Microsoft.PowerShell.Management\Join-Path -Path $Path -ChildPath $ChildPath);
+		} -ParameterFilter { $Path -eq $target -and $Path -and $ChildPath -eq "psievm"; };
+		Mock Write-Host { return; };
+		Mock Test-Path { return $true; };
+		Mock Invoke-ShellCommand {}
+		Mock Remove-Item { return; }
+
+		It "Must execute successfully" {
+			Invoke-Uninstall | Should BeNullOrEmpty;
+			Assert-MockCalled ConvertFrom-StringData -Times 1 -Exactly;
+			Assert-MockCalled Get-DocumentsModulePath -Times 1 -Exactly;
+			Assert-MockCalled Invoke-ShellCommand -Times 1 -Exactly;
+			Assert-MockCalled Remove-Item -Times 1 -Exactly;
+			Assert-MockCalled Test-Path -Times 2 -Exactly;
+			Assert-MockCalled Join-Path -Times 2 -Exactly;
+		}
+	}
+}
+
+
+Describe "Get-EnvironmentFolderPath" {
+	Context "When it exists" {
+		It "Should return the path" {
+			Get-EnvironmentFolderPath -Name "ApplicationData" | Should Not BeNullOrEmpty;
+		}
+	}
+	Context "When it does not exist" {
+		It "Should throw" {
+			$error = $null;
+			try {
+				Get-EnvironmentFolderPath -Name "MadeUpName";
+			} catch [Exception] {
+				$error = $_;
+			}
+
+			$error | Should Not Be $null;
+		}
+	}
 }
 

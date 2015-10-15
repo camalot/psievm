@@ -139,20 +139,10 @@ function Get-IEVM {
 			"^(win(dows)?)?\s?xp$" {
 				$OS = "XP";
 				$arrSet = @("6", "8");
-				# this happens early... I don't think this will work
-				# because VMHost is not yet set so it will go with all VMHosts.
-				#if($VMHost -eq "VirtualBox" -or $VMHost -eq $null) {
-				#	# we can upgrade xp to ie7
-				#	$arrSet = @("6", "7", "8");
-				#}
 			}
 			"^(win(dows)?)?\s?vista$" {
 				$OS = "Vista";
 				$arrSet = @("7");
-				#if($VMHost -eq "VirtualBox" -or $VMHost -eq $null) {
-				#	# we can upgrade xp to ie7
-				#	$arrSet = @("7", "8", "9");
-				#}
 			}
 			"^(win(dows)?)?\s?7$" {
 				$OS = "7";
@@ -187,10 +177,9 @@ function Get-IEVM {
 		$VMUser = "IEUser";
 		$VMPassword = "Passw0rd!";
 		$IEVersion = $PsBoundParameters[$ievParam];
-		$IEUpgrade = $null;
 		Write-Host "Initializing for VMHost '$VMHost'" -BackgroundColor Gray -ForegroundColor Black;
-
-		$vmName = ("IE{0} - Win{1}" -f $IEVersion, $OS);
+		$vmIE = @{$true="11";$false="$IEVersion"}[$IEVersion -ieq "edge"];
+		$vmName = ("IE{0} - Win{1}" -f $vmIE, $OS);
 		$vmPath = (Join-Path -Path $VMRootPath -ChildPath $vmName);
 
 		switch ($VMHost) {
@@ -202,19 +191,6 @@ function Get-IEVM {
 			}
 			"VirtualBox" {
 				$vmext = "ova";
-				# support upgrading the OS to other versions using upgrade packages.
-				switch -Regex ( "$OS$IEVersion" ) {
-					"xp7" {
-						$IEUpgrade = $IEVersion;
-						$IEVersion = "6";
-						Write-Host "Setting XP upgrade on boot from IE $IEVersion to IE $IEUpgrade" -BackgroundColor DarkYellow -ForegroundColor Black;
-					}
-					"vista(8|9)$" {
-						$IEUpgrade = $IEVersion;
-						$IEVersion = "7";
-						Write-Host "Setting Vista upgrade on boot from IE $IEVersion to IE $IEUpgrade" -BackgroundColor DarkYellow -ForegroundColor Black;
-					}
-				}
 			}
 			"Vagrant" {
 				$vmext = "box";
@@ -263,13 +239,12 @@ function Get-IEVM {
 			$url = $baseURL;
 		}
 
-		$baseVMName = ("IE$(@{$true="11";$false="$IEVersion"}[$IEVersion -ieq "edge"]) - Win$OS");
+		$baseVMName = ("IE$vmIE - Win$OS");
 		$vmImportFile = (Join-Path -Path $vmPath -ChildPath "${baseVMName}.${vmext}" );
 		$zip = (Join-Path -Path $vmPath -ChildPath "${vmName}.zip");
 	}
 
 	process {
-
 		#Write-Host "$PSIEVM v$PSIEVMVersion" -ForegroundColor Yellow;
 
 		# if the VM does not exist
@@ -292,7 +267,7 @@ function Get-IEVM {
 					$shouldIgnoreMD5Validation = $PSBoundParameters.ContainsKey('IgnoreInvalidMD5')
 					Write-Host "MD5 hash validation of zip '$zip' failed." -BackgroundColor @{$true="Yellow";$false="Red"}[$shouldIgnoreMD5Validation] -ForegroundColor @{$true="Black";$false="White"}[$shouldIgnoreMD5Validation];
 					if(!$shouldIgnoreMD5Validation) {
-						return;
+						throw "MD5 hash validation of zip '$zip' failed.";
 					}
 				}
 				Write-Host ("Extracting `"$zip`" -> `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
@@ -303,18 +278,18 @@ function Get-IEVM {
 
 			if( !(Test-Path -Path $vmImportFile) ) {
 				Write-Host "VM import file '$vmImportFile' not found." -BackgroundColor Red -ForegroundColor White;
-				return;
+				throw "VM import file '$vmImportFile' not found.";
 			}
 			# Add the VMRootPath to the shares.
 			#$Shares.Add($VMRootPath) | Out-Null;
 			$importSuccess = Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -VMRootPath $VMRootPath -Shares $Shares;
 			if(!$importSuccess) {
 				Write-Host "VM import failed." -BackgroundColor Red -ForegroundColor White;
-				return;
+				throw "VM import failed.";
 			}
 		}
 
-		$startResult = Start-VMHost -VMHost $VMHost -VMName $vmName -IEUpgrade $IEUpgrade -VMRootPath $VMRootPath;
+		$startResult = Start-VMHost -VMHost $VMHost -VMName $vmName -VMRootPath $VMRootPath;
 
 		if(-not $startResult) {
 			throw "Error starting VM '$vmName' on host '$VMHost' at '$VMRootPath'";
@@ -356,7 +331,7 @@ function Import-VMImage {
 
 	switch($VMHost) {
 		"VirtualBox" {
-			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -VMRootPath $VMRootPath -Shares $Shares;
+			return Import-VBoxImage -IEVersion $IEVersion -OS $OS -VMName $VMName -ImportFile $ImportFile -VMRootPath (Join-Path -Path $VMRootPath -ChildPath $VMName) -Shares $Shares;
 		}
 		default {
 			return $false;
@@ -388,13 +363,11 @@ function Start-VMHost {
 		[Parameter(Mandatory=$true)]
 		[string] $VMName,
 		[Parameter(Mandatory=$false)]
-		[string] $IEUpgrade,
-		[Parameter(Mandatory=$false)]
 		[string] $VMRootPath
 	);
 	switch($VMHost) {
 		"VirtualBox" {
-			return Start-VBoxVM -VMName $VMName -IEUpgrade $IEUpgrade -VMRootPath $VMRootPath;
+			return Start-VBoxVM -VMName $VMName -VMRootPath $VMRootPath;
 		}
 		default {
 			return $false;
@@ -413,6 +386,7 @@ function Import-VBoxImage {
 		[string] $VMName,
 		[Parameter(Mandatory=$true)]
 		[string] $ImportFile,
+		# This should be the directory that contains the ova, the disk, everything.
 		[Parameter(Mandatory=$true)]
 		[string] $VMRootPath,
 		[Parameter(Mandatory=$false)]
@@ -434,20 +408,23 @@ function Import-VBoxImage {
 		$disk = (Join-Path -Path $VMRootPath -ChildPath ("$VMName-disk1.vmdk"));
 		Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
-		(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
+		#(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
+		Invoke-ShellCommand -Command $vbm -CommandArgs @("import",  "`"$ImportFile`"", "--vsys", "0", "--vmname", "`"$VMName`"", "--unit",  "$vbunit", "--disk", "`"$disk`"") | Out-Null;
 		$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
 			$shareName = (Split-Path -Path $_ -Leaf);
 			Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
-			(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
+			#(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
+			# Invoke-ShellCommand -Command $vbm 
 		}
 
 		#$dt = (Get-Date -Format 'MM-dd-yyyy hh:mm');
 		#(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
-
+		#Invoke-ShellCommand -Command $vbm -CommandArgs @("setextradata", "`"$VMName`"", "`"psievm`"", "`"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`"") | Out-String | Out-Null;
+		
 		Write-Host ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
-		(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
-
+		#(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
+		Invoke-ShellCommand -Command $vbm -CommandArgs @("snapshot", "`"$VMName`"", "take", "clean", "--description", "`"The initial VM state.`"") | Out-Null;
 		return $true;
 	} catch [System.Exception] {
 		return $false;
@@ -456,26 +433,20 @@ function Import-VBoxImage {
 
 function Start-VBoxVM {
 	Param (
-		[Parameter(Mandatory=$true, Position=0)]
+		[Parameter(Mandatory=$true)]
 		[string] $VMName,
-		[Parameter(Mandatory=$false, Position=1)]
-		[string] $IEUpgrade,
-		[Parameter(Mandatory=$false, Position=2)]
+		[Parameter(Mandatory=$false)]
 		[string] $VMRootPath
 	);
 	try {
 		$vbm = Get-VBoxManageExe;
 		Write-Host "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-		(& $vbm startvm `"$VMName`" *>&1) | Write-Host;
-
+		#(& $vbm startvm `"$VMName`" *>&1) | Write-Host;
+		Invoke-ShellCommand -Command "$vbm" -CommandArgs "startvm", "`"$VMName`"" | Out-Null;
 		return $true;
 	} catch [Exception] {
 		return $false;
 	}
-	#if($IEUpgrade -ne $null -and $IEUpgrade -ne "") {
-	#	Invoke-VBoxUpgrade -OS $OS -IEUpgradeVersion $IEUpgrade -VMName $VMName -VMRootPath $VMRootPath;
-	#}
-
 }
 
 function Test-VBoxVM {
@@ -486,9 +457,10 @@ function Test-VBoxVM {
 	try {
 		$vbm = Get-VBoxManageExe;
 		Write-Host "Testing if VM `"$VMName`" already exists in VirtualBox" -BackgroundColor Gray -ForegroundColor Black;
-		$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
+		#$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
+		$r = Invoke-ShellCommand -Command $vbm -CommandArgs "showvminfo", "`"$VMName`"";
 		$vmnEscaped = [Regex]::Escape($VMName);
-		if($r -match "Could\snot\sfind\sa\sregistered\smachine\snamed\s'$vmnEscaped'") {
+		if($r -imatch "Could\snot\sfind\sa\sregistered\smachine\snamed\s'$vmnEscaped'") {
 			Write-Host ("VM Image not found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
 			# vm does not exist.
 			return $false;
@@ -500,29 +472,20 @@ function Test-VBoxVM {
 	}
 }
 
-function Invoke-RemoteVBoxCommand {
-	Param (
-		[Parameter(Mandatory=$true, Position=0)]
-		[string] $VMName,
-		[Parameter(Mandatory=$true, Position=1)]
-		[string] $Command,
-		[Parameter(Mandatory=$false, Position=2)]
-		[string] $Arguments
-	);
-	$vbm = Get-VBoxManageExe;
-	Write-Host "Executing `"$Command $Arguments`" on `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-	(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Host;
-}
-
-#function Invoke-VBoxCopy {
+#function Invoke-RemoteVBoxCommand {
 #	Param (
+#		[Parameter(Mandatory=$true, Position=0)]
 #		[string] $VMName,
-#		[string] $Source,
-#		[string] $Destination
+#		[Parameter(Mandatory=$true, Position=1)]
+#		[string] $Command,
+#		[Parameter(Mandatory=$false, Position=2)]
+#		[string] $Arguments
 #	);
-
-#	Invoke-RemoteVBoxCommand -VMName $VMName -Command "cmd.exe" -Arguments "/c copy `"E:\\$Source`" `"$Destination`"";
+#	$vbm = Get-VBoxManageExe;
+#	Write-Host "Executing `"$Command $Arguments`" on `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
+#	(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Host;
 #}
+
 
 function Get-VBoxManageExe {
 	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","$($env:ProgramFiles)\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
@@ -535,56 +498,28 @@ function Get-VBoxManageExe {
 	return $vbm;
 }
 
-function Invoke-VBoxUpgrade {
-	Param (
-		[Parameter(Mandatory=$true, Position=0)]
-		[string] $OS,
-		[Parameter(Mandatory=$true, Position=1)]
-		[string] $IEUpgradeVersion,
-		[Parameter(Mandatory=$true, Position=2)]
-		[string] $VMName,
-		[Parameter(Mandatory=$true, Position=3)]
-		[string] $VMRootPath
-	);
-	$urls = @{
-		"WinXPIE7" = "http://download.microsoft.com/download/3/8/8/38889dc1-848c-4bf2-8335-86c573ad86d9/IE7-WindowsXP-x86-enu.exe";
-		"WinVistaIE8" = "http://download.microsoft.com/download/F/8/8/F88F09A2-A315-44C0-848E-48476A9E1577/IE8-WindowsVista-x86-ENU.exe";
-		"WinVistaIE9" = "http://download.microsoft.com/download/0/8/7/08768091-35BC-48E0-9F7F-B9802A0EE2D6/IE9-WindowsVista-x86-enu.exe";
-	}
-
-	$key = "Win${OS}IE${IEUpgradeVersion}";
-	if(!($urls.ContainsKey($key))) {
-		throw [ArgumentException] "Unsupported upgrade Win${OS} -> IE $IEUpgradeVersion";
-	}
-
-	$upgrade = "$key-upgrade.exe";
-	$upgradePath = (Join-Path $VMRootPath -ChildPath $upgrade);
-	Start-BitsTransfer -Source $urls[$key] -Destination $upgradePath;
-	Invoke-VBoxCopy -VMName $VMName -Source $upgrade -Destination "c:\users\IEUser\downloads\$upgrade";
-
-}
-function Wait-VBoxGuestControl {
-	try {
-		$vbm = Get-VBoxManageExe;
-		Write-Host "Waiting for Guest Additions Control Process (Max 3 minutes wait)." -BackgroundColor Gray -ForegroundColor Black -NoNewline;
-		$timeout = new-timespan -Minutes 3
-		$sw = [diagnostics.stopwatch]::StartNew()
-		while ($sw.elapsed -lt $timeout){
-			$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
-			if($r -match "Additions\srun\slevel\:\s+3") {
-				# vm does not exist.
-				Write-Host "Guest Additions Ready." -BackgroundColor Gray -ForegroundColor Black;
-				return $true;
-			}
-			Write-Host "." -NoNewline -BackgroundColor Gray -ForegroundColor Black;
-			Start-Sleep -Seconds 1;
-		}
-		Write-Host "Guest Additions wait timed out." -BackgroundColor Gray -ForegroundColor Black;
-		return $false;
-	} catch {
-		return $false;
-	}
-}
+#function Wait-VBoxGuestControl {
+#	try {
+#		$vbm = Get-VBoxManageExe;
+#		Write-Host "Waiting for Guest Additions Control Process (Max 3 minutes wait)." -BackgroundColor Gray -ForegroundColor Black -NoNewline;
+#		$timeout = new-timespan -Minutes 3
+#		$sw = [diagnostics.stopwatch]::StartNew()
+#		while ($sw.elapsed -lt $timeout){
+#			$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
+#			if($r -match "Additions\srun\slevel\:\s+3") {
+#				# vm does not exist.
+#				Write-Host "Guest Additions Ready." -BackgroundColor Gray -ForegroundColor Black;
+#				return $true;
+#			}
+#			Write-Host "." -NoNewline -BackgroundColor Gray -ForegroundColor Black;
+#			Start-Sleep -Seconds 1;
+#		}
+#		Write-Host "Guest Additions wait timed out." -BackgroundColor Gray -ForegroundColor Black;
+#		return $false;
+#	} catch {
+#		return $false;
+#	}
+#}
 #endregion
 
 #region Chocolatey
@@ -611,8 +546,9 @@ function Install-ChocolateyApp {
 	);
 
 	$choc = Get-ChocolateyExe;
-	$list = $Names -join " ";
-	& $choc install $list -y | Write-Host;
+	$list = ($Names -join " ");
+	$args = "install -y $list" -split " ";
+	Invoke-ShellCommand -Command $choc -CommandArgs $args;
 }
 
 #endregion
@@ -628,7 +564,6 @@ function Get-FileMD5Hash {
 	$stream.Close();
 	return $hash;
 }
-
 
 function Test-MD5Hash {
 	Param (
@@ -662,17 +597,13 @@ function Test-MD5Hash {
 		if((Get-Command -Name "Get-FileHash") -eq $null) {
 			$hash = (Get-FileMD5Hash -Path $Path);
 		} else {
-			$hash = (Get-FileHash -Path $Path -Algorithm MD5).Hash;
+			$hash = (Get-FileHash -Path $Path -Algorithm MD5 -Verbose).Hash;
 		}
 		if(!($hashes.ContainsKey($VMHost)) -or !($hashes[$VMHost].ContainsKey($VMName))) {
 			Write-Warning "No Hash Available for $($VMHost):$($VMName)";
 			return $true;
 		}
 		$chash = $hashes[$VMHost][$VMName];
-		if( $chash -eq $null -or $chash -eq "" ) {
-			Write-Warning "No Hash Available for $($VMHost):$($VMName)";
-			return $true;
-		}
 		Write-Host "MD5 Compare: '$hash' -> '$chash'" -BackgroundColor Gray -ForegroundColor Black;
 		return $hash -ieq $chash;
 	}
@@ -715,10 +646,26 @@ function Expand-7ZipArchive {
 	#}
 }
 
+function Invoke-ShellCommand {
+	param (
+		[Parameter(Mandatory=$true)]
+		[string] $Command,
+		[Parameter(Mandatory=$false)]
+		[string[]] $CommandArgs
+	);
+	$args = $CommandArgs -join " ";
+	Write-Host "$Command $args";
+	return (& "$Command" $CommandArgs *>&1);
+}
+
 function Get-ScriptRoot {
 	if(-not $PSScriptRoot) {
-		return Split-Path -Path $PSCommandPath -Parent;
+		if(-not $PSCommandPath) {
+			return (Split-Path -Path $MyInvocation.MyCommand.Path -Parent);
+		} else {
+			return (Split-Path -Path $PSCommandPath -Parent);
+		}
 	} else {
-		return $PSScriptRoot;
+		return (Resolve-Path -Path $PSScriptRoot);
 	}
 }
