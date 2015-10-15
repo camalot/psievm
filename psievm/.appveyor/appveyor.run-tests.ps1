@@ -27,7 +27,7 @@ $coverageFiles = (Get-ChildItem -Path "$workingDir\*.ps*1") | where { $_.Name -i
 
 Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit -CodeCoverage $coverageFiles -Strict;
 
-if($evn:APPVEYOR) {
+if($env:APPVEYOR) {
 	$wc = New-Object "System.Net.WebClient";
 	$wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $resultsOutput);
 }
