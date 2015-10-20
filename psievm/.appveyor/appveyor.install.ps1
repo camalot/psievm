@@ -8,7 +8,7 @@ $pmn = (Join-Path -Path $oneget -ChildPath "PackageManagement.0.1.0.29315.nupkg"
 $webclient = (New-Object system.net.webclient);
 $webclient.DownloadFile($env:PackageManagementPackageUrl, $pmn);
 
-choco install PackageManagement -y -source $oneget
+choco install PackageManagement -yvd -source $oneget
 
 # if this fails, then the install above failed.
 
