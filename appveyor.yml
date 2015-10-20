@@ -7,15 +7,14 @@ init:
 - ps: >-
     Write-Host "Initializing Build Host";
 
-
     # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 environment:
   POWERSHELLGALLERY_API_TOKEN:
     secure: a+hx9b2u5fyhuLZSxUL50dedlnWj5PFl4zA7KcsilJxWnEtG6psrcUWUUtXgGzkf
   PUSHBULLET_API_TOKEN:
     secure: 2MwCYfQNYPfPjDqNJ1EL8VrIydQNRz3MfhnuI9dzSZag9JwCnqk5k3mMYTFn4ORk
-  PSGetZipUrl:
-    secure: +i9sec3Z3A23nH73dr2i4gCrcO+iW89qtunVf/pZ4fWFDRjqp+1/8e+cWdXElW5R
+  PackageManagementPackageUrl:
+    secure: lUPiuRAjTAF7+CQVEmNnivJHMVDxuI3SRnE6BLPKD9VkrtH+FAVVQ6m+mW5+PbuewoV7/WsIJzHxlzmJ4PxefA==
 install:
 - ps: .\psievm\.appveyor\appveyor.install.ps1
 before_build:

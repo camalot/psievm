@@ -241,10 +241,9 @@ function Get-IEVM {
 
 			if((Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
 				Write-Host ("Validating MD5 File Hash `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
-				if(!(Test-MD5Hash -Path $zip -VMName $vmName -VMHost $VMHost)) {
-					$shouldIgnoreMD5Validation = $PSBoundParameters.ContainsKey('IgnoreInvalidMD5')
-					Write-Host "MD5 hash validation of zip '$zip' failed." -BackgroundColor @{$true="Yellow";$false="Red"}[$shouldIgnoreMD5Validation] -ForegroundColor @{$true="Black";$false="White"}[$shouldIgnoreMD5Validation];
-					if(!$shouldIgnoreMD5Validation) {
+				$shouldIgnoreMD5Validation = $PSBoundParameters.ContainsKey('IgnoreInvalidMD5');
+				if(!($shouldIgnoreMD5Validation)) {
+					if(!(Test-MD5Hash -Path $zip -VMName $vmName -VMHost $VMHost)) {
 						throw "MD5 hash validation of zip '$zip' failed.";
 					}
 				}
@@ -391,9 +390,9 @@ function Import-VBoxImage {
 		$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
 			$shareName = (Split-Path -Path $_ -Leaf);
 			Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+			Invoke-ShellCommand -Command $vbm -CommandArgs @( "sharefolder", "add", "`"$VMName`"", "--name", "`"$shareName`"", "--automount", "--hostpath", "`"$_`"") | Out-Null;
 			#(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
-			# Invoke-ShellCommand -Command $vbm 
-		}
+		};
 
 		#$dt = (Get-Date -Format 'MM-dd-yyyy hh:mm');
 		#(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
@@ -461,12 +460,17 @@ function Test-VBoxVM {
 #	);
 #	$vbm = Get-VBoxManageExe;
 #	Write-Host "Executing `"$Command $Arguments`" on `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-#	(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Host;
+#	#(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Host;
+#	if(Wait-VBoxGuestControl) {
+#		Invoke-ShellCommand -Command $vbm -CommandArgs @("guestcontrol", "`"$VMName`"", "run", "--username", "`"$VMUser`"", "--password", "`"$VMPassword`"", "--exe", "`"$Command`"", "--", "`"$Arguments`"");
+#	} else {
+#		"Unable to execute remote command.`nUnable to get guestcontrol" | Write-Host;
+#	}
 #}
 
 
 function Get-VBoxManageExe {
-	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","$($env:ProgramFiles)\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
+	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","$($env:ProgramFiles)\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | select -First 1;
 	if($vbm -eq $null) {
 		Write-Host "Unable to locate VirtualBox tools. Installing via Chocolatey.";
 		Install-ChocolateyApp -Names virtualbox, vboxguestadditions.install;
@@ -483,7 +487,7 @@ function Get-VBoxManageExe {
 #		$timeout = new-timespan -Minutes 3
 #		$sw = [diagnostics.stopwatch]::StartNew()
 #		while ($sw.elapsed -lt $timeout){
-#			$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
+#			$r = Invoke-ShellCommand -Command $vbm -CommandArgs @("showvminfo", "`"$VMName`"");
 #			if($r -match "Additions\srun\slevel\:\s+3") {
 #				# vm does not exist.
 #				Write-Host "Guest Additions Ready." -BackgroundColor Gray -ForegroundColor Black;

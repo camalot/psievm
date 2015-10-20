@@ -739,7 +739,7 @@ InModuleScope "psievm" {
 				Assert-MockCalled -CommandName Start-VBoxVM -Times 0 -Exactly;
 				Assert-MockCalled -CommandName Test-Path -Times 1 -Exactly -ParameterFilter { $Path -eq $vmPath};
 				Assert-MockCalled -CommandName Start-BitsTransfer -Times 1 -Exactly;
-				Assert-MockCalled -CommandName Test-MD5Hash -Times 1 -Exactly;
+				Assert-MockCalled -CommandName Test-MD5Hash -Times 0 -Exactly;
 				Assert-MockCalled -CommandName Expand-7ZipArchive -Times 1 -Exactly;
 				Assert-MockCalled -CommandName Remove-Item -Times 1 -Exactly;
 				Assert-MockCalled -CommandName Import-VMImage -Times 1 -Exactly;
@@ -850,7 +850,7 @@ InModuleScope "psievm" {
 				Assert-MockCalled -CommandName Start-VBoxVM -Times 0 -Exactly;
 				Assert-MockCalled -CommandName Test-Path -Times 1 -Exactly -ParameterFilter { $Path -eq $vmPath};
 				Assert-MockCalled -CommandName Start-BitsTransfer -Times 1 -Exactly;
-				Assert-MockCalled -CommandName Test-MD5Hash -Times 1 -Exactly;
+				Assert-MockCalled -CommandName Test-MD5Hash -Times 0 -Exactly;
 				Assert-MockCalled -CommandName Expand-7ZipArchive -Times 1 -Exactly;
 				Assert-MockCalled -CommandName Remove-Item -Times 1 -Exactly;
 				Assert-MockCalled -CommandName New-Item -Times 1 -Exactly;
@@ -1003,8 +1003,7 @@ InModuleScope "psievm" {
 			}
 		}
 	}
-
-
+	
 	Describe "Import-VBoxImage" {
 		Context "When IE11/Win10 import is successful" {
 			$vmName = "IE11 - Win10";
@@ -1020,7 +1019,7 @@ InModuleScope "psievm" {
 			It "Must return true" {
 				Import-VBoxImage -IEVersion "Edge" -OS "10" -VMName $vmName -VMRootPath $vmRoot -ImportFile $import -Shares "$vmRoot" | Should Be $true;
 				Assert-MockCalled Get-VBoxManageExe -Times 1 -Exactly;
-				Assert-MockCalled Invoke-ShellCommand -Times 2 -Exactly;
+				Assert-MockCalled Invoke-ShellCommand -Times 3 -Exactly;
 			}
 		}
 
@@ -1038,7 +1037,7 @@ InModuleScope "psievm" {
 			It "Must return true" {
 				Import-VBoxImage -IEVersion "8" -OS "7" -VMName $vmName -VMRootPath $vmRoot -ImportFile $import -Shares "$vmRoot" | Should Be $true;
 				Assert-MockCalled Get-VBoxManageExe -Times 1 -Exactly;
-				Assert-MockCalled Invoke-ShellCommand -Times 2 -Exactly;
+				Assert-MockCalled Invoke-ShellCommand -Times 3 -Exactly;
 			}
 		}
 
@@ -1093,5 +1092,13 @@ InModuleScope "psievm" {
 				Assert-MockCalled Invoke-ShellCommand -Times 1 -Exactly;
 			}
 		}
+	}
+
+	Describe "Wait-VBoxGuestControl" {
+
+	}
+
+	Describe "Invoke-RemoteVBoxCommand" {
+
 	}
 }
