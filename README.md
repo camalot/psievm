@@ -11,17 +11,30 @@
 
 #### Installation
 
-From PowerShell console:
+**From PowerShell console:**
 
-    PS:\> iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1"));
+    PS > iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1"));
 
-From command console:
+**From command console:**
 
     C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1'))"
 
-Chocolatey (initial package is awaiting moderation):
+**From [Powershell Gallery][19]**: 
+
+> Installing modules from the [Powershell Gallery][19] requires the latest version of the PowerShellGet module, which is available in [Windows 10][21], in [Windows Management Framework (WMF) 5.0][20] or from the [PackageManagement PowerShell Modules Preview][22].
+
+Inspect:
+
+    PS > Save-Module -Name psievm -Path <path>
+Install:
+
+    PS > Install-Module -Name psievm
+
+**Chocolatey *(initial package is awaiting moderation)*:**
 
     > choco install psievm
+
+
 
 
 #### Usage
@@ -92,3 +105,7 @@ This is the version of the OS that you want hosted and the version of Internet E
 [16]: https://ci.appveyor.com/project/camalot/psievm
 [17]: https://auchenberg.github.io/volkswagen/volkswargen_ci.svg?v=1
 [18]: https://github.com/auchenberg/volkswagen
+[19]: https://www.powershellgallery.com/packages/psievm/
+[20]: http://go.microsoft.com/fwlink/?LinkId=398175
+[21]: http://go.microsoft.com/fwlink/?LinkID=624830&clcid=0x409
+[22]: https://www.microsoft.com/en-us/download/details.aspx?id=49186

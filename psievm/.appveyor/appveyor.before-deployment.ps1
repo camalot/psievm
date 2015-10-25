@@ -18,7 +18,7 @@ if ( !$env:APPVEYOR_PULL_REQUEST_NUMBER -and ($env:APPVEYOR_REPO_BRANCH -eq "mas
 	$env:CI_DEPLOY = $true;
 } else {
 	# Do not assign a release number or deploy
-	$env:CI_DEPLOY_PSGALLERY = $true;
+	$env:CI_DEPLOY_PSGALLERY = $false;
   $env:CI_DEPLOY_GITHUB = $false;
   $env:CI_DEPLOY_NUGET = $false;
 	$env:CI_DEPLOY_PUSHBULLET = $true;

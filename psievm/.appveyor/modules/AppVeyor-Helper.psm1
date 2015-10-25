@@ -225,18 +225,24 @@ function Invoke-FtpUpload {
 		[string[]] $Files
 
 	);
-	"open $Server
-	user $User $Password
-	binary  
-	mkdir $Path
-	cd $Path     
-	" + ($Files | foreach { 
-		$ppath = (Split-Path -Path $_ -Parent);
-		$lfile = (Split-Path -Path $_ -Leaf);
-		"lcd `"$ppath`" `n";
-		"put `"$lfile`"`n";
-	}) + "bye`n`n" | ftp -i -in | Write-Host;
+	$ldir = $pwd;
+	$fscript = "";
+	($Files | foreach {
+		$ppath = (Split-Path -Path $_ -Parent); 
+		$lfile = (Split-Path -Path $_ -Leaf); 
+		$fscript += "lcd `"$ppath`"`n"; 
+		$fscript += "put `"$lfile`"`n"; 
+	});
+	$script = "open $Server
+user $User $Password
+status
+binary
+mkdir $Path
+cd $Path 
+$($fscript)bye`n`n";
 
+	$script | ftp -i -in | Write-Host;
+	Set-Location -Path $ldir | Out-Null;
 }
 
 Export-ModuleMember -Function Invoke-FtpUpload;
