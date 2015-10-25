@@ -10,7 +10,7 @@ $commitMessageRegex = "^\[deploy\:(pre-release|draft|release)\]$";
 # Must not have a PULL Request Number
 # Must match regex
 if ( !$env:APPVEYOR_PULL_REQUEST_NUMBER -and ($env:APPVEYOR_REPO_BRANCH -eq "master") -and ($env:APPVEYOR_REPO_COMMIT_MESSAGE -match $commitMessageRegex) ) {
-	$env:CI_DEPLOY_PSGALLERY = $false;
+	$env:CI_DEPLOY_PSGALLERY = $true;
   $env:CI_DEPLOY_GITHUB = $true;
   $env:CI_DEPLOY_NUGET = $true;
 	# FTP hangs on the build server and never completes.
