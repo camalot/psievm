@@ -4,13 +4,13 @@ $oneget = (Join-Path -Path $env:APPVEYOR_BUILD_FOLDER -ChildPath "oneget");
 if(!(Test-Path -Path $oneget)) {
 	New-Item -Path $oneget -ItemType Directory | Out-Null;
 }
-$pmn = (Join-Path -Path $oneget -ChildPath "PackageManagement.0.1.0.29315.nupkg");
+$pmn = (Join-Path -Path $oneget -ChildPath "PackageManagement.0.1.0.29815.nupkg");
 $webclient = (New-Object system.net.webclient);
 $webclient.DownloadFile($env:PackageManagementPackageUrl, $pmn);
 
 choco install PackageManagement -yvd -source $oneget
 
-# if this fails, then the install above failed.
+## if this fails, then the install above failed.
 
 Get-PackageProvider -Name NuGet -ForceBootstrap;
 Install-Module -Name PSScriptAnalyzer -Force;
