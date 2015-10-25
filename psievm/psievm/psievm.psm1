@@ -608,24 +608,23 @@ function Expand-7ZipArchive {
 		[Parameter(Mandatory=$true, Position=1)]
 		[string] $DestinationPath
 	);
-
-#	if((Get-Command -Name "Expand-Archive") -eq $null) {
+	begin {
+		$7zaUrl = "https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe";
 		$scriptRootPath = Get-ScriptRoot;
 		$toolsDir = (Join-Path -Path $scriptRootPath -ChildPath "tools");
-
 		if(!(Test-Path -Path $toolsDir)) {
 			New-Item -Path $toolsDir -ItemType Directory | Out-Null;
 		}
 		$7zaExe = (Join-Path -Path $toolsDir -ChildPath "7za.exe");
+	}
+	process {
 		if(!(Test-Path -Path $7zaExe)) {
 			# download 7zip
 			Write-Host "Download 7Zip commandline tool";
-			Invoke-DownloadFile -Url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -File "$7zaExe";
+			Invoke-DownloadFile -Url $7zaUrl -File "$7zaExe";
 		}
 		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
-	#} else {
-	#	Expand-Archive -Path $Path -DestinationPath $DestinationPath -Force | Out-Null;
-	#}
+	}
 }
 
 function Invoke-ShellCommand {

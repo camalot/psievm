@@ -1,4 +1,4 @@
-version: 0.1.{build}
+version: 0.2.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
@@ -15,6 +15,14 @@ environment:
     secure: 2MwCYfQNYPfPjDqNJ1EL8VrIydQNRz3MfhnuI9dzSZag9JwCnqk5k3mMYTFn4ORk
   PackageManagementPackageUrl:
     secure: +i9sec3Z3A23nH73dr2i4t8yqLL2knrBHHpKC12w6F9znix1dU7vyNYYZVVcs+l+WVs1YNe7N0bJQ1Agi5qQXw==
+  FTP_SERVER:
+    secure: KxS2LdlWc3kX+FsmbQLj7A==
+  FTP_PATH:
+    secure: 8T4UR2xlHu4uQ0pAcDn2uFoscgEgGyhaN/E2nezXr4IqL7hxu7FTvH/YeW+nhePT
+  FTP_USER:
+    secure: vaowb/D3z+XBBFS4KY92pQ==
+  FTP_PASSWORD:
+    secure: RZt3dJkgiCEcmCwHrUWd6RRAvomAPZwrEOfdlseDqp4=
 install:
 - ps: .\psievm\.appveyor\appveyor.install.ps1
 before_build:

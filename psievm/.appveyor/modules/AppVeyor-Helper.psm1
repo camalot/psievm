@@ -216,5 +216,28 @@ function Set-BuildVersion {
 
 Export-ModuleMember -Function Set-BuildVersion;
 
+function Invoke-FtpUpload {
+	param (
+		[string] $Server,
+		[string] $Username,
+		[string] $Password,
+		[string] $Path,
+		[string[]] $Files
 
+	);
+	"open $Server
+	user $User $Password
+	binary  
+	mkdir $Path
+	cd $Path     
+	" + ($Files | foreach { 
+		$ppath = (Split-Path -Path $_ -Parent);
+		$lfile = (Split-Path -Path $_ -Leaf);
+		"lcd `"$ppath`" `n";
+		"put `"$lfile`"`n";
+	}) + "bye`n`n" | ftp -i -in | Write-Host;
+
+}
+
+Export-ModuleMember -Function Invoke-FtpUpload;
 
