@@ -13,7 +13,8 @@ if ( !$env:APPVEYOR_PULL_REQUEST_NUMBER -and ($env:APPVEYOR_REPO_BRANCH -eq "mas
 	$env:CI_DEPLOY_PSGALLERY = $false;
   $env:CI_DEPLOY_GITHUB = $true;
   $env:CI_DEPLOY_NUGET = $true;
-  $env:CI_DEPLOY_FTP = $true;
+	# FTP hangs on the build server and never completes.
+  $env:CI_DEPLOY_FTP = $false;
 	$env:CI_DEPLOY_PUSHBULLET = $true;
 	$env:CI_DEPLOY = $true;
 } else {
@@ -22,6 +23,6 @@ if ( !$env:APPVEYOR_PULL_REQUEST_NUMBER -and ($env:APPVEYOR_REPO_BRANCH -eq "mas
   $env:CI_DEPLOY_GITHUB = $false;
   $env:CI_DEPLOY_NUGET = $false;
 	$env:CI_DEPLOY_PUSHBULLET = $true;
-  $env:CI_DEPLOY_FTP = $true;
+  $env:CI_DEPLOY_FTP = $false;
 	$env:CI_DEPLOY = $false;
 }

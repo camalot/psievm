@@ -235,14 +235,13 @@ function Invoke-FtpUpload {
 	});
 $script = "open $Server
 user $Username $Password
+binary  
 status
 verbose
-binary  
 mkdir $Path
 cd $Path     
 $($fscript)bye`n`n";
 
-	$script -replace "user\s[^\S]+\s[^\S]+", "user ****** *****************" | Write-Host;
 	$script | ftp -i -in; 
 	Set-Location -Path $ldir | Out-Null;
 }

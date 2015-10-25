@@ -22,7 +22,7 @@ environment:
   FTP_USERNAME:
     secure: vaowb/D3z+XBBFS4KY92pQ==
   FTP_PASSWORD:
-    secure: L7tFAZkY3wwG9e1stJK6iNP9mjFI/aQnuaKxBFOIqWE=
+    secure: vHYAuJ1yoNGnXZA5hbrj7rSJpgBsTDtwWwNfiUNzNE8=
 install:
 - ps: .\psievm\.appveyor\appveyor.install.ps1
 before_build:

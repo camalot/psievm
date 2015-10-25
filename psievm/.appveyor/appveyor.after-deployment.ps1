@@ -16,6 +16,8 @@ if($env:PUSHBULLET_API_TOKEN -and $env:CI_DEPLOY_PUSHBULLET -eq $true) {
 }
 
 if($env:CI_DEPLOY_FTP -eq $true) {
+	# FTP hangs on the build server and never completes.
+
 	$files = Get-ChildItem -Path "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)" | where { $_ -imatch "^.*\.(zip|nupkg)$"; } | select -ExpandProperty FullName;
 	$uploadPath = "$env:FTP_PATH$($env:CI_BUILD_VERSION)/";
 	Invoke-FtpUpload -Server $env:FTP_SERVER -Path $uploadPath -Username $env:FTP_USERNAME -Password $env:FTP_PASSWORD -Files $files;
