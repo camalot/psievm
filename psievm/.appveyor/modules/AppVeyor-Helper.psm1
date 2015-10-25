@@ -233,16 +233,19 @@ function Invoke-FtpUpload {
 		$fscript += "lcd `"$ppath`"`n"; 
 		$fscript += "put `"$lfile`"`n"; 
 	});
-	$script = "open $Server
+$script = "open $Server
 user $User $Password
 status
-binary
+binary  
 mkdir $Path
-cd $Path 
+cd $Path     
 $($fscript)bye`n`n";
 
-	$script | ftp -i -in | Write-Host;
-	Set-Location -Path $ldir | Out-Null;
+
+$script -replace "user\sappveyor\s[^\S]+","user ***** *****************************" | Write-Host;
+
+ $script | ftp -i -in; 
+ Set-Location -Path $ldir | Out-Null;
 }
 
 Export-ModuleMember -Function Invoke-FtpUpload;
