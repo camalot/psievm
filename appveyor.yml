@@ -19,10 +19,10 @@ environment:
     secure: KxS2LdlWc3kX+FsmbQLj7A==
   FTP_PATH:
     secure: 8T4UR2xlHu4uQ0pAcDn2uFoscgEgGyhaN/E2nezXr4IqL7hxu7FTvH/YeW+nhePT
-  FTP_USER:
+  FTP_USERNAME:
     secure: vaowb/D3z+XBBFS4KY92pQ==
   FTP_PASSWORD:
-    secure: RZt3dJkgiCEcmCwHrUWd6RRAvomAPZwrEOfdlseDqp4=
+    secure: L7tFAZkY3wwG9e1stJK6iNP9mjFI/aQnuaKxBFOIqWE=
 install:
 - ps: .\psievm\.appveyor\appveyor.install.ps1
 before_build:

@@ -234,15 +234,12 @@ function Invoke-FtpUpload {
 		$fscript += "put `"$lfile`"`n"; 
 	});
 $script = "open $Server
-user $User $Password
+user $Username $Password
 status
 binary  
 mkdir $Path
 cd $Path     
 $($fscript)bye`n`n";
-
-
-$script -replace "user\sappveyor\s[^\S]+","user ***** *****************************" | Write-Host;
 
  $script | ftp -i -in; 
  Set-Location -Path $ldir | Out-Null;
