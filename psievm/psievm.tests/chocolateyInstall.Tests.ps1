@@ -1,8 +1,8 @@
 if($PSCommandPath -eq $null) {
-	Write-Host "Using MyInvoction.MyCommand.Path";
+	Write-Output "Using MyInvoction.MyCommand.Path";
 	$CommandRootPath = (Split-Path -Parent $MyInvocation.MyCommand.Path);
 } else {
-	Write-Host "Using PSCommandPath";
+	Write-Output "Using PSCommandPath";
 	$CommandRootPath = (Split-Path -Parent $PSCommandPath);
 }
 # This stops the initial invoking of Invoke-Setup;
@@ -57,7 +57,7 @@ Describe "Install-PSIEVM" {
 		Mock Start-Process { return; };
 		Mock Remove-Item { return; };
 		Mock New-Item { return; };
-		Mock Write-Host { return; };
+		Mock Write-Output { return; };
 		It "Must Install From Github Release" {
 			Install-PSIEVM -ModulesPath (Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\WindowsPowerShell\Modules\") | Should BeNullOrEmpty;
 			Assert-MockCalled Get-LatestGithubRelease -Times 1 -Exactly;	
@@ -93,7 +93,7 @@ Describe "Install-PSIEVM" {
 		Mock Start-Process { return; };
 		Mock Remove-Item { return; };
 		Mock New-Item { return; };
-		Mock Write-Host { return; };
+		Mock Write-Output { return; };
 		It "Must Install From Github Release" {
 			Install-PSIEVM -ModulesPath (Microsoft.PowerShell.Management\Join-Path -Path $TestDrive -ChildPath "\WindowsPowerShell\Modules\") | Should BeNullOrEmpty;
 			Assert-MockCalled Get-LatestGithubRelease -Times 1 -Exactly;	
@@ -142,7 +142,7 @@ Describe "Invoke-Setup" {
 		Mock Join-Path {
 			return (Microsoft.PowerShell.Management\Join-Path -Path $Path -ChildPath $ChildPath);
 		} -ParameterFilter { $Path -eq $target -and $Path -and $ChildPath -eq "psievm"; };
-		Mock Write-Host { return; };
+		Mock Write-Output { return; };
 		Mock Test-Path { return $true; };
 		Mock Invoke-ShellCommand {}
 		Mock Remove-Item { return; }

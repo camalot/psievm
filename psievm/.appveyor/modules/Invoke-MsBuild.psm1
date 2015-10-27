@@ -60,9 +60,9 @@ function Invoke-MsBuild
 	$buildSucceeded = Invoke-MsBuild -Path "C:\Some Folder\MySolution.sln"
 	
 	if ($buildSucceeded)
-	{ Write-Host "Build completed successfully." }
+	{ Write-Output "Build completed successfully." }
 	else
-	{ Write-Host "Build failed. Check the build log file for errors." }
+	{ Write-Output "Build failed. Check the build log file for errors." }
 	
 	Perform the default MSBuild actions on the Visual Studio solution to build the projects in it, and returns whether the build succeeded or failed.
 	The PowerShell script will halt execution until MsBuild completes.
@@ -270,7 +270,7 @@ function Invoke-MsBuild
 		# Get if the build failed or not by looking at the log file.
 		$buildSucceeded = (((Select-String -Path $buildLogFilePath -Pattern "Build FAILED." -SimpleMatch) -eq $null) -and $processExitCode -eq 0)
 		# should be able to just write the output here because there is already a check for the log file.
-		Get-Content -Path $buildLogFilePath | Write-Host;
+		Get-Content -Path $buildLogFilePath | Write-Output;
 		# If the build succeeded.
 		if ($buildSucceeded)
 		{

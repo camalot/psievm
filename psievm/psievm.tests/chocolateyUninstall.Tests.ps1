@@ -1,8 +1,8 @@
 if($PSCommandPath -eq $null) {
-	Write-Host "Using MyInvoction.MyCommand.Path";
+	Write-Output "Using MyInvoction.MyCommand.Path";
 	$CommandRootPath = (Split-Path -Parent $MyInvocation.MyCommand.Path);
 } else {
-	Write-Host "Using PSCommandPath";
+	Write-Output "Using PSCommandPath";
 	$CommandRootPath = (Split-Path -Parent $PSCommandPath);
 }
 # This stops the initial invoking of Invoke-Uninstall;
@@ -74,7 +74,7 @@ Describe "Invoke-Uninstall" {
 		Mock Join-Path {
 			return (Microsoft.PowerShell.Management\Join-Path -Path $Path -ChildPath $ChildPath);
 		} -ParameterFilter { $Path -eq $target -and $Path -and $ChildPath -eq "psievm"; };
-		Mock Write-Host { return; };
+		Mock Write-Output { return; };
 		Mock Test-Path { return $true; };
 		Mock Invoke-ShellCommand {}
 		Mock Remove-Item { return; }
@@ -105,7 +105,7 @@ Describe "Invoke-Uninstall" {
 		Mock Join-Path {
 			return (Microsoft.PowerShell.Management\Join-Path -Path $Path -ChildPath $ChildPath);
 		} -ParameterFilter { $Path -eq $target -and $Path -and $ChildPath -eq "psievm"; };
-		Mock Write-Host { return; };
+		Mock Write-Output { return; };
 		Mock Test-Path { return $true; };
 		Mock Invoke-ShellCommand {}
 		Mock Remove-Item { return; }

@@ -10,7 +10,7 @@ if($env:PUSHBULLET_API_TOKEN -and $env:CI_DEPLOY_PUSHBULLET -eq $true) {
 			# Send a pushbullet message if there is an api token available
 			Send-PushbulletMessage -apiKey $pbtoken -Type Message -Title "[Build] PSIEVM v$env:APPVEYOR_BUILD_VERSION Build Finished" -msg ("Build completed at $timestamp UTC");
 		} catch [Exeption] {
-			Write-Host -BackgroundColor Red -ForegroundColor White $_.ToString();
+			Write-Output -BackgroundColor Red -ForegroundColor White $_.ToString();
 		}
 	}
 }
@@ -33,7 +33,7 @@ if( $env:POWERSHELLGALLERY_API_TOKEN -and $env:CI_DEPLOY_PSGALLERY -eq $true ) {
 		Import-Module "PowerShellGet" -Verbose -Force;
 
 		if( (Get-Command -Name "Publish-Module" -ParameterName Name,NuGetApiKey,Path) ) {
-			"Found the loaded PowerShellGet Module" | Write-Host;
+			"Found the loaded PowerShellGet Module" | Write-Output;
 			$artifact = "$env:APPVEYOR_BUILD_FOLDER\psievm\bin\$($env:CI_BUILD_VERSION)\psievm";
 			Publish-Module -NuGetApiKey $env:POWERSHELLGALLERY_API_TOKEN -Path $artifact;
 		}

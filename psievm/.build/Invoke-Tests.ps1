@@ -4,16 +4,16 @@ param (
 );
 
 if($PSCommandPath -eq $null) {
-	Write-Host "Using MyInvoction.MyCommand.Path";
+	Write-Output "Using MyInvoction.MyCommand.Path";
 	$CommandRootPath = (Split-Path -Parent $MyInvocation.MyCommand.Path);
 } else {
-	Write-Host "Using PSCommandPath";
+	Write-Output "Using PSCommandPath";
 	$CommandRootPath = (Split-Path -Parent $PSCommandPath);
 }
 
 
 if(-not (Get-Module -ListAvailable -Name "pester")) {
-	choco install pester -y | Write-Host;
+	choco install pester -y | Write-Output;
 }
 
 Import-Module "pester" -Verbose -Force;

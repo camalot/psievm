@@ -1,5 +1,5 @@
 if(-not (Get-Module -ListAvailable -Name "pester")) {
-	choco install pester -y | Write-Host;
+	choco install pester -y | Write-Output;
 }
 
 Import-Module "pester" -Verbose -Force;
@@ -24,6 +24,8 @@ New-Item -Path (Join-Path -Path $workingDir -ChildPath "results") -ItemType Dire
 $resultsOutput = (Join-Path -Path $binDir -ChildPath "psievm-tests.results.xml");
 
 $coverageFiles = (Get-ChildItem -Path "$workingDir\*.ps*1") | where { $_.Name -inotmatch "\.tests\.ps1$" -and $_.Name -inotmatch "\.psd1$" } | % { $_.FullName };
+
+(Get-ChildItem -Include @("$workingDir\*.psm1", "$workingDir\*.ps1") ) | select -ExpandProperty FullName | foreach { Invoke-ScriptAnalyzer -Path $_ -Verbose };
 
 Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit -CodeCoverage $coverageFiles -Strict;
 

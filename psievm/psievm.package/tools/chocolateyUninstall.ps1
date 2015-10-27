@@ -26,7 +26,7 @@ function Invoke-ShellCommand {
 	param (
 		[string[]] $CommandArgs
 	)
-	& cmd /c ($CommandArgs -join " ") *>&1 | Write-Host;
+	& cmd /c ($CommandArgs -join " ") *>&1 | Write-Output;
 }
 
 function Invoke-Uninstall {
@@ -43,13 +43,13 @@ function Invoke-Uninstall {
 	if($env:chocolateyPackageFolder) {
 		$ModuleTarget = (Join-Path $env:chocolateyPackageFolder "Modules");
 		if(Test-Path($ModuleTarget)) {
-			"Delete $ModuleTarget" | Write-Host;
+			"Delete $ModuleTarget" | Write-Output;
 			Remove-Item -Path $ModuleTarget -Recurse -Force | Out-Null;
 		}
 	}
 
 	if(Test-Path($PSIEVMModuleRootPath)) {
-		"Delete $PSIEVMModuleRootPath" | Write-Host;
+		"Delete $PSIEVMModuleRootPath" | Write-Output;
 		# cmd is used because Remove-Item wont delete a junction
 		Invoke-ShellCommand -CommandArgs "rmdir", "/S", "/Q", "`"$PSIEVMModuleRootPath`"";
 	}

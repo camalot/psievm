@@ -4,7 +4,7 @@ function Invoke-DownloadFile {
 		[string]$file
 	);
 	process {
-		"Downloading $url to $file" | Write-Host;
+		"Downloading $url to $file" | Write-Output;
 		$downloader = new-object System.Net.WebClient;
 		$downloader.DownloadFile($url, $file);
 	}
@@ -24,7 +24,7 @@ function Expand-ZipArchive {
 	}
 
 	# unzip the package
-	"Extracting $file to $Destination" | Write-Host;
+	"Extracting $file to $Destination" | Write-Output;
 	Start-Process "$7zaExe" -ArgumentList "x -o`"$Destination`" -y `"$File`"" -Wait -NoNewWindow;
 }
 
@@ -191,7 +191,7 @@ Export-ModuleMember -Function Send-PushBulletMessage;
 
 function Set-BuildVersion {
 	process {
-		Write-Host "Setting up build version";
+		Write-Output "Setting up build version";
 		$dt = (Get-Date).ToUniversalTime();
 		$doy = $dt.DayOfYear.ToString();
 		$yy = $dt.ToString("yy");
@@ -210,7 +210,7 @@ function Set-BuildVersion {
 		Set-AppveyorBuildVariable -Name CI_BUILD_REVISION -Value $r;
 		Set-AppveyorBuildVariable -Name CI_BUILD_VERSION -Value "$m1.$m2.$b.$r";
 
-		Write-Host "Set the CI_BUILD_VERSION to $env:CI_BUILD_VERSION";
+		Write-Output "Set the CI_BUILD_VERSION to $env:CI_BUILD_VERSION";
 	}
 }
 

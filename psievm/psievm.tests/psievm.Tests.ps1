@@ -1,8 +1,8 @@
 if($PSCommandPath -eq $null) {
-	Write-Host "Using MyInvoction.MyCommand.Path";
+	Write-Output "Using MyInvoction.MyCommand.Path";
 	$CommandRootPath = (Split-Path -Parent $MyInvocation.MyCommand.Path);
 } else {
-	Write-Host "Using PSCommandPath";
+	Write-Output "Using PSCommandPath";
 	$CommandRootPath = (Split-Path -Parent $PSCommandPath);
 }
 
@@ -144,7 +144,7 @@ InModuleScope "psievm" {
 			# The first time this is called, it should return false.
 			Mock Test-Path { $script:tpathCalled += 1; return @{$true=$false;$false=$true}[$script:tpathCalled -eq 1] };
 			Mock Invoke-InstallChocolatey { };
-			Mock Write-Host { return; } -ParameterFilter { $BackgroundColor -eq "Red" };
+			Mock Write-Output { return; } -ParameterFilter { $BackgroundColor -eq "Red" };
 			It "Must install chocolatey" {
 				Get-ChocolateyExe | Should BeExactly "$env:ProgramData\chocolatey\choco.exe";
 				Assert-MockCalled -CommandName Invoke-InstallChocolatey -Times 1 -Exactly;
@@ -156,7 +156,7 @@ InModuleScope "psievm" {
 			$chocoPath = "$env:ProgramData\chocolatey\choco.exe";
 			Mock Test-Path { return $false; };
 			Mock Invoke-InstallChocolatey { };
-			Mock Write-Host { return; } -ParameterFilter { $BackgroundColor -eq "Red" };
+			Mock Write-Output { return; } -ParameterFilter { $BackgroundColor -eq "Red" };
 			It "Must throw FileNotFoundException" {
 				{ return Get-ChocolateyExe } | Should Throw;
 				Assert-MockCalled -CommandName Invoke-InstallChocolatey -Times 1 -Exactly;
@@ -188,7 +188,7 @@ InModuleScope "psievm" {
 				$retval = [PSCustomObject]@{};
 				Add-Member -InputObject $retval -MemberType ScriptMethod DownloadString {
 						param( [string] $url );
-					return "Write-Host `"Choco Script`"";
+					return "Write-Output `"Choco Script`"";
 				}
 				return $retval;
 		} -ParameterFilter {$TypeName -and ($TypeName -ilike 'Net.WebClient') }
@@ -199,7 +199,7 @@ InModuleScope "psievm" {
 
 	Describe "Install-ChocolateyApp" {
 		Context "When need to install app" {
-			Mock Invoke-ShellCommand { Write-Host "$Command $($CommandArgs -join " ")"};
+			Mock Invoke-ShellCommand { Write-Output "$Command $($CommandArgs -join " ")"};
 			It "Should invoke the install" {
 				Install-ChocolateyApp virtualbox, virtualbox.additions;
 				Assert-MockCalled Invoke-ShellCommand -Times 1 -Exactly;
@@ -250,8 +250,8 @@ InModuleScope "psievm" {
 			Mock Get-Command {return @{};} -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
 			Mock Get-FileMD5Hash { return "61A2B69A5712ABD6566FCBD1F44F7A2B"; };
-			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Host $Object };
-			Mock Write-Host { return; };
+			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Output $Object };
+			Mock Write-Output { return; };
 			It "must return true" {
 				Test-MD5Hash -VMName $vmName -VMHost $vmHost -Path $path | Should Be $true;
 
@@ -270,8 +270,8 @@ InModuleScope "psievm" {
 			Mock Get-Command {return $null; } -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
 			Mock Get-FileMD5Hash { return "61A2B69A5712ABD6566FCBD1F44F7A2B"; };
-			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Host $Object };
-			Mock Write-Host { return; };
+			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Output $Object };
+			Mock Write-Output { return; };
 			It "must return true" {
 				Test-MD5Hash -VMName $vmName -VMHost $vmHost -Path $path | Should Be $true;
 
@@ -290,8 +290,8 @@ InModuleScope "psievm" {
 			Mock Get-Command {return $null;} -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
 			Mock Get-FileMD5Hash { return "61A2B69A5712ABD6566FCBD1F44F7A2B"; };
-			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Host $Object };
-			Mock Write-Host { return; };
+			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Output $Object };
+			Mock Write-Output { return; };
 			It "must return true" {
 				Test-MD5Hash -VMName $vmName -VMHost $vmHost -Path $path | Should Be $true;
 
@@ -310,8 +310,8 @@ InModuleScope "psievm" {
 			Mock Get-Command {return @{};} -ParameterFilter { $Name -and $Name -eq "Get-FileHash"};
 			Mock Get-FileHash { return @{ Hash = "61A2B69A5712ABD6566FCBD1F44F7A2B"; }; };
 			Mock Get-FileMD5Hash { return "61A2B69A5712ABD6566FCBD1F44F7A2B"; };
-			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Host $Object };
-			Mock Write-Host { return; };
+			Mock Write-Warning { Microsoft.PowerShell.Utility\Write-Output $Object };
+			Mock Write-Output { return; };
 			It "must return true" {
 				Test-MD5Hash -VMName $vmName -VMHost $vmHost -Path $path | Should Be $true;
 
@@ -425,7 +425,7 @@ InModuleScope "psievm" {
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
 
-			Mock Write-Host { };
+			Mock Write-Output { };
 			It "Must Start VM" {
 				Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost | Should BeNullOrEmpty;
 				Assert-MockCalled -CommandName Start-VMHost -Times 1 -Exactly;
@@ -446,7 +446,7 @@ InModuleScope "psievm" {
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
 
-			Mock Write-Host { };
+			Mock Write-Output { };
 			It "Must Start VM" {
 				Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost | Should BeNullOrEmpty;
 				Assert-MockCalled -CommandName Start-VMHost -Times 1 -Exactly;
@@ -467,7 +467,7 @@ InModuleScope "psievm" {
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
 
-			Mock Write-Host { };
+			Mock Write-Output { };
 			It "Must Start VM" {
 				Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost | Should BeNullOrEmpty;
 				Assert-MockCalled -CommandName Start-VMHost -Times 1 -Exactly;
@@ -488,7 +488,7 @@ InModuleScope "psievm" {
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
 
-			Mock Write-Host { };
+			Mock Write-Output { };
 			It "Must Start VM" {
 				Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost | Should BeNullOrEmpty;
 				Assert-MockCalled -CommandName Start-VMHost -Times 1 -Exactly;
@@ -509,7 +509,7 @@ InModuleScope "psievm" {
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
 
-			Mock Write-Host { };
+			Mock Write-Output { };
 			It "Must Start VM" {
 				Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost | Should BeNullOrEmpty;
 				Assert-MockCalled -CommandName Start-VMHost -Times 1 -Exactly;
@@ -530,7 +530,7 @@ InModuleScope "psievm" {
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
 			Mock Import-VMImage { return $true; };
-			Mock Write-Host { };
+			Mock Write-Output { };
 			It "Must Start VM" {
 				Get-IEVM -OS $os -IEVersion $ie -AlternateVMLocation $altLocation -VMRootPath $altLocation -VMHost $vmHost | Should BeNullOrEmpty;
 				Assert-MockCalled -CommandName Start-VMHost -Times 1 -Exactly;
@@ -558,7 +558,7 @@ InModuleScope "psievm" {
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
-			Mock Write-Host { };
+			Mock Write-Output { };
 
 			Mock Test-Path { return $true } -ParameterFilter { $Path -eq $vmPath };
 			Mock Test-Path { 
@@ -615,7 +615,7 @@ InModuleScope "psievm" {
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
-			Mock Write-Host { };
+			Mock Write-Output { };
 
 			Mock Test-Path { return $true } -ParameterFilter { $Path -eq $vmPath };
 			Mock Test-Path { 
@@ -667,7 +667,7 @@ InModuleScope "psievm" {
 			Mock New-Item {
 				Microsoft.PowerShell.Management\New-Item -Path $Path -Force -ItemType $ItemType | Out-Null;
 			}
-			Mock Write-Host { };
+			Mock Write-Output { };
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
@@ -716,7 +716,7 @@ InModuleScope "psievm" {
 			Mock New-Item {
 				Microsoft.PowerShell.Management\New-Item -Path $Path -Force -ItemType $ItemType | Out-Null;
 			}
-			Mock Write-Host { };
+			Mock Write-Output { };
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
@@ -765,7 +765,7 @@ InModuleScope "psievm" {
 			Mock New-Item {
 				Microsoft.PowerShell.Management\New-Item -Path $Path -Force -ItemType $ItemType | Out-Null;
 			}
-			Mock Write-Host { };
+			Mock Write-Output { };
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
@@ -818,7 +818,7 @@ InModuleScope "psievm" {
 			Mock New-Item {
 				Microsoft.PowerShell.Management\New-Item -Path $Path -Force -ItemType $ItemType | Out-Null;
 			}
-			Mock Write-Host { };
+			Mock Write-Output { };
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $true; };
 			Mock Start-VBoxVM { return $true; };
@@ -876,7 +876,7 @@ InModuleScope "psievm" {
 			Mock Test-VMHost { return $false; };
 			Mock Start-VMHost { return $false; };
 			Mock Start-VBoxVM { return $true; };
-			Mock Write-Host { };
+			Mock Write-Output { };
 
 			Mock Test-Path { return $true } -ParameterFilter { $Path -eq $vmPath };
 			Mock Test-Path { 
@@ -888,7 +888,7 @@ InModuleScope "psievm" {
 				return ( $script:ovaCheck -gt 2 );
 				return $false;
 			} -ParameterFilter { $Path -eq $ova};
-			Mock Write-Host { };
+			Mock Write-Output { };
 			Mock Start-BitsTransfer { return; };
 			Mock Test-MD5Hash { return $true; };
 			Mock Import-VMImage { return $true; };
@@ -968,7 +968,7 @@ InModuleScope "psievm" {
 				return Join-Path -Path $TestDrive -ChildPath "VBoxManage.exe";
 			}
 			Mock Invoke-ShellCommand {
-				"$Command $CommandArgs" | Write-Host;
+				"$Command $CommandArgs" | Write-Output;
 				return "Could not find a registered machine named '$vmName'";
 			}
 			It "Must return false" {
@@ -982,7 +982,7 @@ InModuleScope "psievm" {
 				return Join-Path -Path $TestDrive -ChildPath "VBoxManage.exe";
 			}
 			Mock Invoke-ShellCommand {
-				"$Command $CommandArgs" | Write-Host;
+				"$Command $CommandArgs" | Write-Output;
 				return "Not The Error Message";
 			}
 			It "Must return true" {
