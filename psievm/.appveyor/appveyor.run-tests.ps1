@@ -3,6 +3,8 @@ if(-not (Get-Module -ListAvailable -Name "pester")) {
 }
 
 Import-Module "pester" -Verbose -Force;
+Import-Module "PSScriptAnalyzer" -Verbose -Force;
+
 $cdir = $PWD;
 
 if(-not $env:CI_BUILD_VERSION) {
