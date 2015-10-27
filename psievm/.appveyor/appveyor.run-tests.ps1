@@ -3,7 +3,7 @@ if(-not (Get-Module -ListAvailable -Name "pester")) {
 }
 
 Import-Module "pester" -Verbose -Force;
-Import-Module "PSScriptAnalyzer" -Verbose -Force;
+#Import-Module "PSScriptAnalyzer" -Verbose -Force;
 
 $cdir = $PWD;
 
@@ -27,10 +27,10 @@ $resultsOutput = (Join-Path -Path $binDir -ChildPath "psievm-tests.results.xml")
 
 $coverageFiles = (Get-ChildItem -Path "$workingDir\*.ps*1") | where { $_.Name -inotmatch "\.tests\.ps1$" -and $_.Name -inotmatch "\.psd1$" } | % { $_.FullName };
 
-Get-ChildItem -Path $workingDir | where { $_ -ilike "*.psm1" -or $_ -ilike "*.ps1" } | select -ExpandProperty FullName | foreach { 
-	Write-Host "Executing ScriptAnalyzer on $_";
-	Invoke-ScriptAnalyzer -Path $_ -Verbose;
-};
+#Get-ChildItem -Path $workingDir | where { $_ -ilike "*.psm1" -or $_ -ilike "*.ps1" } | select -ExpandProperty FullName | foreach { 
+#	Write-Host "Executing ScriptAnalyzer on $_";
+#	Invoke-ScriptAnalyzer -Path $_ -Verbose;
+#};
 
 Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -EnableExit -CodeCoverage $coverageFiles -Strict;
 

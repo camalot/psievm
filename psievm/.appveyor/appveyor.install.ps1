@@ -13,4 +13,4 @@ choco install PackageManagement -y -source $oneget
 ## if this fails, then the install above failed.
 
 Get-PackageProvider -Name NuGet -ForceBootstrap;
-Install-Module -Name PSScriptAnalyzer -Force;
+#Install-Module -Name PSScriptAnalyzer -Force;
