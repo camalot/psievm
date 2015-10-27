@@ -19,7 +19,7 @@
 
     C:\> @powershell -NoProfile -ExecutionPolicy -ByPass -Command "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/camalot/psievm/master/psievm/psievm.package/tools/chocolateyInstall.ps1'))"
 
-**From [Powershell Gallery][19]**: 
+**From [Powershell Gallery][23]**: 
 
 > Installing modules from the [Powershell Gallery][19] requires the latest version of the PowerShellGet module, which is available in [Windows 10][21], in [Windows Management Framework (WMF) 5.0][20] or from the [PackageManagement PowerShell Modules Preview][22].
 
@@ -109,3 +109,4 @@ This is the version of the OS that you want hosted and the version of Internet E
 [20]: http://go.microsoft.com/fwlink/?LinkId=398175
 [21]: http://go.microsoft.com/fwlink/?LinkID=624830&clcid=0x409
 [22]: https://www.microsoft.com/en-us/download/details.aspx?id=49186
+[23]: https://www.powershellgallery.com/pages/GettingStarted
