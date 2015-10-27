@@ -177,7 +177,7 @@ function Get-IEVM {
 		$VMUser = "IEUser";
 		$VMPassword = "Passw0rd!";
 		$IEVersion = $PsBoundParameters[$ievParam];
-		Write-Output "Initializing for VMHost '$VMHost'" -BackgroundColor Gray -ForegroundColor Black;
+		Write-Host "Initializing for VMHost '$VMHost'" -BackgroundColor Gray -ForegroundColor Black;
 		$vmIE = @{$true="11";$false="$IEVersion"}[$IEVersion -ieq "edge"];
 		$vmName = ("IE{0} - Win{1}" -f $vmIE, $OS);
 		$vmPath = (Join-Path -Path $VMRootPath -ChildPath $vmName);
@@ -223,45 +223,45 @@ function Get-IEVM {
 	}
 
 	process {
-		#Write-Output "$PSIEVM v$PSIEVMVersion" -ForegroundColor Yellow;
+		#Write-Host "$PSIEVM v$PSIEVMVersion" -ForegroundColor Yellow;
 
 		# if the VM does not exist
 		if( !(Test-VMHost -VMHost $VMHost -VMName $vmName) ) {
 
 			# if the vmPath doesnt exist, create it.
 			if(!(Test-Path -Path $vmPath)) {
-				Write-Output ("Creating path `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
+				Write-Host ("Creating path `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
 				New-Item -Path $vmPath -ItemType Directory | Out-Null;
 			}
 
 			if(!(Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
-				Write-Output ("Transfer from: `"$url`" -> `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
+				Write-Host ("Transfer from: `"$url`" -> `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				Start-BitsTransfer -Source $url -Destination $zip;
 			}
 
 			if((Test-Path -Path $zip) -and !(Test-Path -Path $vmImportFile)) {
-				Write-Output ("Validating MD5 File Hash `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
+				Write-Host ("Validating MD5 File Hash `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				$shouldIgnoreMD5Validation = $PSBoundParameters.ContainsKey('IgnoreInvalidMD5');
 				if(!($shouldIgnoreMD5Validation)) {
 					if(!(Test-MD5Hash -Path $zip -VMName $vmName -VMHost $VMHost)) {
 						throw "MD5 hash validation of zip '$zip' failed.";
 					}
 				}
-				Write-Output ("Extracting `"$zip`" -> `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
+				Write-Host ("Extracting `"$zip`" -> `"$vmPath`"") -BackgroundColor Gray -ForegroundColor Black;
 				Expand-7ZipArchive -Path $zip -DestinationPath (Split-Path $zip);
-				Write-Output ("Deleting `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
+				Write-Host ("Deleting `"$zip`"") -BackgroundColor Gray -ForegroundColor Black;
 				Remove-Item -Path $zip -Force | Out-Null;
 			}
 
 			if( !(Test-Path -Path $vmImportFile) ) {
-				Write-Output "VM import file '$vmImportFile' not found." -BackgroundColor Red -ForegroundColor White;
+				Write-Host "VM import file '$vmImportFile' not found." -BackgroundColor Red -ForegroundColor White;
 				throw "VM import file '$vmImportFile' not found.";
 			}
 			# Add the VMRootPath to the shares.
 			#$Shares.Add($VMRootPath) | Out-Null;
 			$importSuccess = Import-VMImage -VMHost $VMHost -VMName $vmName -ImportFile $vmImportFile -IEVersion $IEVersion -OS $OS -VMRootPath $VMRootPath -Shares $Shares;
 			if(!$importSuccess) {
-				Write-Output "VM import failed." -BackgroundColor Red -ForegroundColor White;
+				Write-Host "VM import failed." -BackgroundColor Red -ForegroundColor White;
 				throw "VM import failed.";
 			}
 		}
@@ -383,13 +383,13 @@ function Import-VBoxImage {
 		$vbm = Get-VBoxManageExe;
 		$vbox = (Join-Path -Path $VMRootPath -ChildPath "${$VMName}.vbox");
 		$disk = (Join-Path -Path $VMRootPath -ChildPath ("$VMName-disk1.vmdk"));
-		Write-Output ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+		Write-Host ("Importing $ImportFile to VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
 		#(& $vbm import `"$ImportFile`" --vsys 0 --vmname `"$VMName`" --unit $vbunit --disk `"$disk`" 2>&1 | Out-String) | Out-Null;
 		Invoke-ShellCommand -Command $vbm -CommandArgs @("import",  "`"$ImportFile`"", "--vsys", "0", "--vmname", "`"$VMName`"", "--unit",  "$vbunit", "--disk", "`"$disk`"") | Out-Null;
 		$Shares | where { $_ -ne "" -and $_ -ne $null; } | foreach {
 			$shareName = (Split-Path -Path $_ -Leaf);
-			Write-Output ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+			Write-Host ("Adding share `"$shareName`" on VM `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 			Invoke-ShellCommand -Command $vbm -CommandArgs @( "sharefolder", "add", "`"$VMName`"", "--name", "`"$shareName`"", "--automount", "--hostpath", "`"$_`"") | Out-Null;
 			#(& $vbm sharedfolder add `"$VMName`" --name `"$shareName`" --automount --hostpath `"$_`" 2>&1 | Out-String) | Out-Null;
 		};
@@ -398,7 +398,7 @@ function Import-VBoxImage {
 		#(& $vbm setextradata `"$VMName`" `"psievm`" `"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`" 2>&1 | Out-String) | Out-Null;
 		#Invoke-ShellCommand -Command $vbm -CommandArgs @("setextradata", "`"$VMName`"", "`"psievm`"", "`"{\`"created\`" : \`"$dt\`", \`"version\`" : \`"$PSIEVMVERSION`"}\`"") | Out-String | Out-Null;
 		
-		Write-Output ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
+		Write-Host ("Taking initial snapshot of `"$VMName`"") -BackgroundColor Gray -ForegroundColor Black;
 
 		#(& $vbm snapshot `"$VMName`" take clean --description `"The initial VM state.`" 2>&1 | Out-String) | Out-Null;
 		Invoke-ShellCommand -Command $vbm -CommandArgs @("snapshot", "`"$VMName`"", "take", "clean", "--description", "`"The initial VM state.`"") | Out-Null;
@@ -417,8 +417,8 @@ function Start-VBoxVM {
 	);
 	try {
 		$vbm = Get-VBoxManageExe;
-		Write-Output "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-		#(& $vbm startvm `"$VMName`" *>&1) | Write-Output;
+		Write-Host "Starting VM `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
+		#(& $vbm startvm `"$VMName`" *>&1) | Write-Host;
 		Invoke-ShellCommand -Command "$vbm" -CommandArgs "startvm", "`"$VMName`"" | Out-Null;
 		return $true;
 	} catch [Exception] {
@@ -433,16 +433,16 @@ function Test-VBoxVM {
 	);
 	try {
 		$vbm = Get-VBoxManageExe;
-		Write-Output "Testing if VM `"$VMName`" already exists in VirtualBox" -BackgroundColor Gray -ForegroundColor Black;
+		Write-Host "Testing if VM `"$VMName`" already exists in VirtualBox" -BackgroundColor Gray -ForegroundColor Black;
 		#$r = & "$vbm" showvminfo `"$VMName`" 2>&1 | Out-String;
 		$r = Invoke-ShellCommand -Command $vbm -CommandArgs "showvminfo", "`"$VMName`"";
 		$vmnEscaped = [Regex]::Escape($VMName);
 		if($r -imatch "Could\snot\sfind\sa\sregistered\smachine\snamed\s'$vmnEscaped'") {
-			Write-Output ("VM Image not found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
+			Write-Host ("VM Image not found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
 			# vm does not exist.
 			return $false;
 		}
-		Write-Output ("VM Image found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
+		Write-Host ("VM Image found in VirtualBox.") -BackgroundColor Gray -ForegroundColor Black;
 		return $true;
 	} catch {
 		return $false;
@@ -459,12 +459,12 @@ function Test-VBoxVM {
 #		[string] $Arguments
 #	);
 #	$vbm = Get-VBoxManageExe;
-#	Write-Output "Executing `"$Command $Arguments`" on `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
-#	#(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Output;
+#	Write-Host "Executing `"$Command $Arguments`" on `"$VMName`"" -BackgroundColor Gray -ForegroundColor Black;
+#	#(& $vbm guestcontrol `"$VMName`" run --username `"$VMUser`" --password `"$VMPassword`" --exe `"$Command`" -- `"$Arguments`" *>&1) | Out-String | Write-Host;
 #	if(Wait-VBoxGuestControl) {
 #		Invoke-ShellCommand -Command $vbm -CommandArgs @("guestcontrol", "`"$VMName`"", "run", "--username", "`"$VMUser`"", "--password", "`"$VMPassword`"", "--exe", "`"$Command`"", "--", "`"$Arguments`"");
 #	} else {
-#		"Unable to execute remote command.`nUnable to get guestcontrol" | Write-Output;
+#		"Unable to execute remote command.`nUnable to get guestcontrol" | Write-Host;
 #	}
 #}
 
@@ -472,7 +472,7 @@ function Test-VBoxVM {
 function Get-VBoxManageExe {
 	$vbm = @("${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe","$($env:ProgramFiles)\Oracle\VirtualBox\VBoxManage.exe") | where { Test-Path -Path $_ } | select -First 1;
 	if($vbm -eq $null) {
-		Write-Output "Unable to locate VirtualBox tools. Installing via Chocolatey.";
+		Write-Host "Unable to locate VirtualBox tools. Installing via Chocolatey.";
 		Install-ChocolateyApp -Names virtualbox, vboxguestadditions.install;
 
 		return "${env:ProgramFiles(x86)}\Oracle\VirtualBox\VBoxManage.exe";
@@ -483,20 +483,20 @@ function Get-VBoxManageExe {
 #function Wait-VBoxGuestControl {
 #	try {
 #		$vbm = Get-VBoxManageExe;
-#		Write-Output "Waiting for Guest Additions Control Process (Max 3 minutes wait)." -BackgroundColor Gray -ForegroundColor Black -NoNewline;
+#		Write-Host "Waiting for Guest Additions Control Process (Max 3 minutes wait)." -BackgroundColor Gray -ForegroundColor Black -NoNewline;
 #		$timeout = new-timespan -Minutes 3
 #		$sw = [diagnostics.stopwatch]::StartNew()
 #		while ($sw.elapsed -lt $timeout){
 #			$r = Invoke-ShellCommand -Command $vbm -CommandArgs @("showvminfo", "`"$VMName`"");
 #			if($r -match "Additions\srun\slevel\:\s+3") {
 #				# vm does not exist.
-#				Write-Output "Guest Additions Ready." -BackgroundColor Gray -ForegroundColor Black;
+#				Write-Host "Guest Additions Ready." -BackgroundColor Gray -ForegroundColor Black;
 #				return $true;
 #			}
-#			Write-Output "." -NoNewline -BackgroundColor Gray -ForegroundColor Black;
+#			Write-Host "." -NoNewline -BackgroundColor Gray -ForegroundColor Black;
 #			Start-Sleep -Seconds 1;
 #		}
-#		Write-Output "Guest Additions wait timed out." -BackgroundColor Gray -ForegroundColor Black;
+#		Write-Host "Guest Additions wait timed out." -BackgroundColor Gray -ForegroundColor Black;
 #		return $false;
 #	} catch {
 #		return $false;
@@ -508,7 +508,7 @@ function Get-VBoxManageExe {
 function Get-ChocolateyExe {
 	$cho = "$env:ProgramData\chocolatey\choco.exe";
 	if(!(Test-Path -Path $cho) ) {
-		Write-Output -BackgroundColor Red -ForegroundColor White "Unable to locate chocolatey. Installing chocolatey...";
+		Write-Host -BackgroundColor Red -ForegroundColor White "Unable to locate chocolatey. Installing chocolatey...";
 		Invoke-InstallChocolatey;
 		if(!(Test-Path -Path $cho) ) {
 			throw [System.IO.FileNotFoundException] "Still unable to locate chocolatey, even after install attempt."
@@ -518,7 +518,7 @@ function Get-ChocolateyExe {
 }
 
 function Invoke-InstallChocolatey {
-	Invoke-Expression -Command ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Output;
+	Invoke-Expression -Command ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
 
 function Install-ChocolateyApp {
@@ -586,7 +586,7 @@ function Test-MD5Hash {
 			return $true;
 		}
 		$chash = $hashes[$VMHost][$VMName];
-		Write-Output "MD5 Compare: '$hash' -> '$chash'" -BackgroundColor Gray -ForegroundColor Black;
+		Write-Host "MD5 Compare: '$hash' -> '$chash'" -BackgroundColor Gray -ForegroundColor Black;
 		return $hash -ieq $chash;
 	}
 }
@@ -620,10 +620,10 @@ function Expand-7ZipArchive {
 	process {
 		if(!(Test-Path -Path $7zaExe)) {
 			# download 7zip
-			Write-Output "Download 7Zip commandline tool";
+			Write-Host "Download 7Zip commandline tool";
 			Invoke-DownloadFile -Url $7zaUrl -File "$7zaExe";
 		}
-		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Output;
+		Start-Process "$7zaExe" -ArgumentList "x -o`"$DestinationPath`" -y `"$Path`"" -Wait -NoNewWindow | Write-Host;
 	}
 }
 
@@ -635,7 +635,7 @@ function Invoke-ShellCommand {
 		[string[]] $CommandArgs
 	);
 	$args = $CommandArgs -join " ";
-	Write-Output "$Command $args";
+	Write-Host "$Command $args";
 	return (& "$Command" $CommandArgs *>&1);
 }
 

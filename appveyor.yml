@@ -5,7 +5,7 @@ skip_tags: true
 os: Windows Server 2012 R2
 init:
 - ps: >-
-    Write-Output "Initializing Build Host";
+    Write-Host "Initializing Build Host";
 
     # iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'));
 environment:

@@ -9,7 +9,7 @@ function Invoke-DownloadFile {
 		[string]$File
 	);
 	process {
-		"Downloading $Url to $File" | Write-Output;
+		"Downloading $Url to $File" | Write-Host;
 		$downloader = new-object System.Net.WebClient;
 		$downloader.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;
 		$downloader.DownloadFile($Url, $File);
@@ -22,9 +22,9 @@ function Install-PSIEVM {
 		[string] $ModulesPath
 	)
 	begin {
-		"Installing PSIEVM PowerShell module" | Write-Output;
-		"Copyright (c) 2015 Ryan Conrad" | Write-Output;
-		"License: https://github.com/camalot/psievm/blob/master/LICENSE.md" | Write-Output;
+		"Installing PSIEVM PowerShell module" | Write-Host;
+		"Copyright (c) 2015 Ryan Conrad" | Write-Host;
+		"License: https://github.com/camalot/psievm/blob/master/LICENSE.md" | Write-Host;
 		$url = (Get-LatestGithubRelease -Owner camalot -Repo psievm);
 
 		$tempDir = (Join-Path $env:TEMP "psievm");
@@ -44,19 +44,19 @@ function Install-PSIEVM {
 		Invoke-DownloadFile -url $url -file $file;
 
 		# download 7zip
-		"Download 7Zip commandline tool" | Write-Output;
+		"Download 7Zip commandline tool" | Write-Host;
 		$7zaExe = (Join-Path $tempDir '7za.exe');
 		Invoke-DownloadFile -url 'https://raw.githubusercontent.com/camalot/psievm/master/psievm/.tools/7za.exe' -file "$7zaExe";
 
 		# unzip the package
-		"Extracting $file to $ModulesPath" | Write-Output;
+		"Extracting $file to $ModulesPath" | Write-Host;
 		Start-Process "$7zaExe" -ArgumentList "x -o`"$ModulesPath`" -y `"$file`"" -Wait -NoNewWindow;
-		"Unblock module files on the system" | Write-Output;
+		"Unblock module files on the system" | Write-Host;
 		Get-ChildItem -Path "$psievmModulePath" -File -Recurse | Unblock-File | Out-Null;
 	}
 	end {
 		if(Test-Path -Path $tempDir) {
-			"Clean up temp directory [$tempDir]" | Write-Output;
+			"Clean up temp directory [$tempDir]" | Write-Host;
 			Remove-Item -Path $tempDir -Force -Recurse | Out-Null;
 		}
 	}
@@ -89,11 +89,11 @@ function Get-LatestGithubRelease {
 	}
 	process {
 		$webclient = New-Object -TypeName "net.webclient";
-		"Getting latest release information from GitHub Repository $Owner/$Repo" | Write-Output;
+		"Getting latest release information from GitHub Repository $Owner/$Repo" | Write-Host;
 		$webclient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.52 Safari/537.36");
 		$webclient.Headers.Add("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 		$latest = ($webclient.DownloadString("https://api.github.com/repos/$Owner/$Repo/releases") | ConvertFrom-Json) | select -First 1;
-		"Using release '$($latest.name)'" | Write-Output;
+		"Using release '$($latest.name)'" | Write-Host;
 		$url = $latest.assets | select -ExpandProperty browser_download_url -First 1;
 		return $url;
 	}
@@ -127,7 +127,7 @@ function Invoke-ShellCommand {
 	param (
 		[string[]] $CommandArgs
 	)
-	& cmd /c ($CommandArgs -join " ") *>&1 | Write-Output;
+	& cmd /c ($CommandArgs -join " ") *>&1 | Write-Host;
 }
 
 function Invoke-Setup {
@@ -147,14 +147,14 @@ function Invoke-Setup {
 		Install-PSIEVM -ModulesPath $ModuleTarget;
 
 		if(Test-Path($PSIEVMModuleRootPath)) {
-			"Delete $PSIEVMModuleRootPath" | Write-Output;
+			"Delete $PSIEVMModuleRootPath" | Write-Host;
 			# cmd is used because Remove-Item wont delete a junction
 			Remove-Item -Path $PSIEVMModuleRootPath -Recurse -Force;
 			Invoke-ShellCommand -CommandArgs "rmdir", "/S", "/Q", "`"$PSIEVMModuleRootPath`"";
 			#cmd /c rmdir "$PSIEVMModuleRootPath";
 		}
 
-		"Creating junction: $PSIEVMModuleRootPath -> $PSIEVMModuleTarget" | Write-Output;
+		"Creating junction: $PSIEVMModuleRootPath -> $PSIEVMModuleTarget" | Write-Host;
 		Invoke-ShellCommand -CommandArgs "mklink", "/j", "`"$PSIEVMModuleRootPath`"", "`"$PSIEVMModuleTarget`"";
 		#cmd /c mklink /j "$PSIEVMModuleRootPath" "$PSIEVMModuleTarget";
 	} else {
