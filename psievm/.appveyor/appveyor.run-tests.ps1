@@ -37,6 +37,10 @@ Invoke-Pester -Script $tests -OutputFormat NUnitXml -OutputFile $resultsOutput -
 if($env:APPVEYOR) {
 	$wc = New-Object "System.Net.WebClient";
 	$wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $resultsOutput);
+
+	if($env:CODECOV_TOKEN -and $env:APPVEYOR_REPO_COMMIT) {
+		$wcUploadFile("https://codecov.io/upload/v2?token=$($env:CODEVOC_TOKEN)&commit=$($env:APPVEYOR_REPO_COMMIT)&branch=$($env:APPVEYOR_REPO_BRANCH)&job=$($env:APPVEYOR_JOB_ID)", $resultsOutput);
+	}
 }
 
 Set-Location -Path $cdir | Out-Null;

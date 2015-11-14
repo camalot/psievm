@@ -23,6 +23,8 @@ environment:
     secure: vaowb/D3z+XBBFS4KY92pQ==
   FTP_PASSWORD:
     secure: vHYAuJ1yoNGnXZA5hbrj7rSJpgBsTDtwWwNfiUNzNE8=
+  CODECOV_TOKEN:
+    secure: nBzk0M2k8zAi5EHn9RNJo0c01PZ+OsIdMKWG0h7GsAS6FiKAkR5GfQO1TUo88QLY
 install:
 - ps: .\psievm\.appveyor\appveyor.install.ps1
 before_build:
