@@ -1,5 +1,5 @@
 if(-not (Get-Module -ListAvailable -Name "pester")) {
-	choco install pester -y | Write-Host;
+	choco install pester -y -force | Write-Host;
 }
 
 Import-Module "pester" -Verbose -Force;
