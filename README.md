@@ -1,4 +1,4 @@
-# ![PSIEVM][14] psievm [![Build status][15]][16] [![volkswagen status][17]][18]
+# ![PSIEVM][14] psievm [![Build status][15]][16] [![volkswagen status][17]][18] <!--[![codecov.io][24]][25]-->
 
  *psievm* is a powershell module for automating an IE Virtual Machine quickly and without hassle to help make cross browser testing easier. This will do all the steps needed to get the VM running. 
 
@@ -30,7 +30,7 @@ Install:
 
     PS > Install-Module -Name psievm
 
-**Chocolatey *(initial package is awaiting moderation)*:**
+**Chocolatey:**
 
     > choco install psievm
 
@@ -110,3 +110,5 @@ This is the version of the OS that you want hosted and the version of Internet E
 [21]: http://go.microsoft.com/fwlink/?LinkID=624830&clcid=0x409
 [22]: https://www.microsoft.com/en-us/download/details.aspx?id=49186
 [23]: https://www.powershellgallery.com/pages/GettingStarted
+[24]: https://codecov.io/github/camalot/psievm/coverage.svg?branch=master
+[25]: https://codecov.io/github/camalot/psievm?branch=master
